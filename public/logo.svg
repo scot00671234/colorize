@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+  <defs>
+    <radialGradient id="sphere" cx="35%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#b8d0dc" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#8ba8b8" stop-opacity="0.9"/>
+      <stop offset="75%" stop-color="#5a7a8a"/>
+      <stop offset="100%" stop-color="#4a6572"/>
+    </radialGradient>
+    <radialGradient id="highlight" cx="38%" cy="28%" r="25%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.7"/>
+      <stop offset="70%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a0bcc8" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#3d5560" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#sphere)"/>
+  <circle cx="32" cy="32" r="30" fill="url(#highlight)"/>
+  <circle cx="32" cy="32" r="29.5" fill="none" stroke="url(#glass-edge)" stroke-width="1" opacity="0.6"/>
+</svg>

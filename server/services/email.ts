@@ -45,7 +45,7 @@ export const emailService: EmailService = config.resend.apiKey
   ? createResendService()
   : stubEmailService
 
-const APP_NAME = 'Colorize'
+const APP_NAME = 'Wish Wello'
 
 /** Build verification email — uses confirmUrl from config (set APP_BASE_URL in production). */
 export function buildVerificationEmail(options: {

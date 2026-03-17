@@ -10,7 +10,7 @@ export default function DashboardSettings() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [billingLoading, setBillingLoading] = useState<'pro' | 'enterprise' | 'portal' | null>(null)
+  const [billingLoading, setBillingLoading] = useState<'starter' | 'pro' | 'enterprise' | 'portal' | null>(null)
   const [billingError, setBillingError] = useState<string | null>(null)
 
   const isPro = user?.isPro === true
@@ -22,7 +22,7 @@ export default function DashboardSettings() {
     }
   }, [searchParams, refreshUser])
 
-  async function handleUpgrade(plan: 'pro' | 'enterprise') {
+  async function handleUpgrade(plan: 'starter' | 'pro' | 'enterprise') {
     setBillingError(null)
     setBillingLoading(plan)
     try {
@@ -72,15 +72,15 @@ export default function DashboardSettings() {
         <h2 className="dashboardSettingsHeading">Subscription</h2>
         <div className="dashboardCard">
           <p className="dashboardSettingsPlan">
-            Current plan: <strong>{isPro ? 'Pro' : 'Free'}</strong>
-            {isPro && user?.projectLimit != null && (
-              <span className="dashboardSettingsPlanHint"> — {user.projectLimit} projects</span>
+            Current plan: <strong>{isPro ? (user?.subscriptionPlan ? user.subscriptionPlan.charAt(0).toUpperCase() + user.subscriptionPlan.slice(1) : 'Pro') : 'Free'}</strong>
+            {isPro && user?.photoLimit != null && (
+              <span className="dashboardSettingsPlanHint"> — {user.photoLimit} photos/month</span>
             )}
           </p>
           <p className="dashboardSettingsHint">
             {isPro
               ? 'Billing is managed with Stripe. Use the portal to update payment or cancel your subscription.'
-              : 'Upgrade to Pro for more photo colorizations per month and restoration. Billing is managed with Stripe.'}
+              : 'Upgrade for photo colorizations. Choose Starter (50), Pro (150), or Team (400) photos per month. Billing is managed with Stripe.'}
           </p>
           {billingError && <p className="dashboardSettingsError">{billingError}</p>}
           <div className="dashboardSettingsActions">
@@ -88,11 +88,19 @@ export default function DashboardSettings() {
               <>
                 <button
                   type="button"
+                  className="dashboardBtn dashboardBtnSecondary"
+                  onClick={() => handleUpgrade('starter')}
+                  disabled={!user || billingLoading !== null}
+                >
+                  {billingLoading === 'starter' ? 'Opening…' : 'Starter — $19/mo'}
+                </button>
+                <button
+                  type="button"
                   className="dashboardBtn dashboardBtnPrimary"
                   onClick={() => handleUpgrade('pro')}
                   disabled={!user || billingLoading !== null}
                 >
-                  {billingLoading === 'pro' ? 'Opening…' : 'Upgrade to Pro'}
+                  {billingLoading === 'pro' ? 'Opening…' : 'Pro — $29/mo'}
                 </button>
                 <button
                   type="button"
@@ -100,7 +108,7 @@ export default function DashboardSettings() {
                   onClick={() => handleUpgrade('enterprise')}
                   disabled={!user || billingLoading !== null}
                 >
-                  {billingLoading === 'enterprise' ? 'Opening…' : 'Upgrade to Enterprise'}
+                  {billingLoading === 'enterprise' ? 'Opening…' : 'Team — $59/mo'}
                 </button>
               </>
             )}

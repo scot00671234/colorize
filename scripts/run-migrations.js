@@ -1,6 +1,6 @@
 /**
- * Runs server/schema.sql and server/migrations/002, 003, 004 (usage, password reset, projects).
- * using DATABASE_URL from .env. No psql required.
+ * Runs server/schema.sql and server/migrations/002–006 (usage, password reset, projects, photo_jobs, subscription_plan).
+ * Uses DATABASE_URL from .env. No psql required.
  */
 import 'dotenv/config'
 import pg from 'pg'
@@ -38,6 +38,8 @@ export async function runMigrations() {
     await runFile('server/migrations/004_projects.sql')
     console.log('Running server/migrations/005_photo_jobs.sql...')
     await runFile('server/migrations/005_photo_jobs.sql')
+    console.log('Running server/migrations/006_subscription_plan.sql...')
+    await runFile('server/migrations/006_subscription_plan.sql')
     console.log('Migrations done.')
   } finally {
     await client.end()

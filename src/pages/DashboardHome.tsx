@@ -6,10 +6,14 @@ import { api } from '../api/client'
 type Project = { id: string; title: string; content: string; created_at: string; updated_at: string }
 
 export default function DashboardHome() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    refreshUser()
+  }, [refreshUser])
 
   useEffect(() => {
     let cancelled = false
@@ -31,6 +35,21 @@ export default function DashboardHome() {
           Go to <Link to="/dashboard/colorize" className="dashboardCardLink">Colorize</Link> to upload a black & white or damaged photo. Our AI will colorize or restore it; you can download the result from your job history.
         </p>
       </div>
+      <section className="dashboardCard" aria-label="Photo colorizations">
+        <h2 className="dashboardPageSubtitle">Photo colorizations</h2>
+        <p className="dashboardCardText">
+          {user?.photoLimit != null && user.photoCount != null ? (
+            <>
+              <strong>{user.photoCount} / {user.photoLimit}</strong> photos used
+              {user.photoLimit === 0 ? ' — subscribe in Settings to upload.' : ` (Starter: 50, Pro: 150, Team: 400). `}
+              <Link to="/dashboard/colorize" className="dashboardCardLink">Go to Colorize</Link>
+              {user.photoLimit > 0 ? ' to upload or manage.' : ''}
+            </>
+          ) : (
+            <>Loading usage… <Link to="/dashboard/colorize" className="dashboardCardLink">Colorize</Link></>
+          )}
+        </p>
+      </section>
       <section className="dashboardCard" aria-label="Your projects">
         <h2 className="dashboardPageSubtitle">Your projects</h2>
         {error && <p className="dashboardSettingsError">{error}</p>}
@@ -55,7 +74,7 @@ export default function DashboardHome() {
           </ul>
         )}
         <p className="dashboardCardText dashboardProjectLimit">
-          Project limit: {projects.length} / {limit} (Free: 1, Pro: 10, Team: 100). Upgrade in Settings for more.
+          Project limit: {projects.length} / {limit} (Starter: 1, Pro: 10, Team: 100). Upgrade in Settings for more.
         </p>
       </section>
     </div>

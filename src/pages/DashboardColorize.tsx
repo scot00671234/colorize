@@ -1,31 +1,27 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { api } from '../api/client'
-
-type Job = {
-  id: string
-  type: string
-  status: string
-  inputUrl: string | null
-  outputUrl: string | null
-  error_message: string | null
-  created_at: string
-  updated_at: string
-}
+import { api, type Job } from '../api/client'
 
 const POLL_INTERVAL_MS = 2000
 const ACCEPT = 'image/jpeg,image/jpg,image/png,image/webp,image/gif'
 
 export default function DashboardColorize() {
   const [jobs, setJobs] = useState<Job[]>([])
+  const [photoLimit, setPhotoLimit] = useState(0)
+  const [photoCount, setPhotoCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadJobs = useCallback(() => {
     api.jobs
       .list()
-      .then((res) => setJobs(res.jobs))
+      .then((res) => {
+        setJobs(res.jobs)
+        setPhotoLimit(res.photoLimit)
+        setPhotoCount(res.photoCount)
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load jobs'))
       .finally(() => setLoading(false))
   }, [])
@@ -71,6 +67,7 @@ export default function DashboardColorize() {
           },
           ...prev,
         ])
+        setPhotoCount((c) => c + 1)
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Upload failed'))
       .finally(() => {
@@ -88,6 +85,22 @@ export default function DashboardColorize() {
     a.click()
   }
 
+  function handleDelete(job: Job) {
+    if (deletingId) return
+    setError(null)
+    setDeletingId(job.id)
+    api.jobs
+      .delete(job.id)
+      .then(() => {
+        setJobs((prev) => prev.filter((j) => j.id !== job.id))
+        setPhotoCount((c) => Math.max(0, c - 1))
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to delete'))
+      .finally(() => setDeletingId(null))
+  }
+
+  const atLimit = photoLimit > 0 && photoCount >= photoLimit
+
   return (
     <div className="dashboardPage">
       <h1 className="dashboardPageTitle">Colorize</h1>
@@ -95,16 +108,23 @@ export default function DashboardColorize() {
 
       <section className="dashboardCard" aria-label="Upload">
         <h2 className="dashboardPageSubtitle">Upload photo</h2>
-        <p className="dashboardCardText">JPEG, PNG, WebP or GIF. Max 10MB.</p>
+        <p className="dashboardCardText">
+          {photoLimit === 0
+            ? 'Subscribe to a plan in Settings to upload and colorize photos.'
+            : `JPEG, PNG, WebP or GIF. Max 10MB. ${photoCount} / ${photoLimit} photos used.`}
+        </p>
         <input
           ref={fileInputRef}
           type="file"
           accept={ACCEPT}
           onChange={handleFileChange}
-          disabled={uploading}
+          disabled={uploading || atLimit}
           className="dashboardColorizeInput"
           aria-label="Choose image"
         />
+        {atLimit && photoLimit > 0 && (
+          <p className="dashboardCardText">Limit reached. Delete a photo below to free space or upgrade in Settings.</p>
+        )}
         {uploading && <p className="dashboardCardText">Uploading and processing…</p>}
         {error && <p className="dashboardSettingsError" role="alert">{error}</p>}
       </section>
@@ -142,11 +162,22 @@ export default function DashboardColorize() {
                 </div>
                 <div className="dashboardColorizeMeta">
                   <span>{new Date(job.created_at).toLocaleString()}</span>
-                  {job.status === 'completed' && job.outputUrl && (
-                    <button type="button" className="dashboardCardLink" onClick={() => downloadOutput(job)}>
-                      Download
+                  <span className="dashboardColorizeMetaActions">
+                    {job.status === 'completed' && job.outputUrl && (
+                      <button type="button" className="dashboardCardLink" onClick={() => downloadOutput(job)}>
+                        Download
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="dashboardCardLink dashboardColorizeDelete"
+                      onClick={() => handleDelete(job)}
+                      disabled={deletingId === job.id}
+                      aria-label="Delete photo"
+                    >
+                      {deletingId === job.id ? 'Deleting…' : 'Delete'}
                     </button>
-                  )}
+                  </span>
                 </div>
               </li>
             ))}

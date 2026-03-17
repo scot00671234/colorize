@@ -1796,6 +1796,19 @@
   padding: 0;
 }
 
+.dashboardColorizeMetaActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dashboardColorizeDelete {
+  color: var(--text-secondary);
+}
+.dashboardColorizeDelete:hover {
+  color: var(--error, #c33);
+}
+
 .dashboardSettingsSection {
   margin-bottom: 2rem;
 }

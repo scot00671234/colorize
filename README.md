@@ -73,7 +73,7 @@ npm run server
 Photo colorize and restore features are in development. See **[docs/COLORIZE_CC_ANALYSIS_AND_PLAN.md](docs/COLORIZE_CC_ANALYSIS_AND_PLAN.md)** for the product plan and implementation roadmap.
 
 - **Dashboard:** After signing in, go to **/dashboard** for account overview and (when built) colorize/restore tools.
-- **Migrations:** Run `server/schema.sql` and `server/migrations/002_resume_builder.sql`, `003_*`, `004_*` (or `npm run migrate`) for `users`, `usage_logs`, and `projects`.
+- **Migrations:** Run `server/schema.sql` and `server/migrations/002` through `006` (or `npm run migrate`) for `users`, `usage_logs`, `projects`, `photo_jobs`, and `subscription_plan`.
 
 ### Setup (full app)
 

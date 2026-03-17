@@ -38,6 +38,7 @@ export const config = {
 
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
+    priceStarter: process.env.STRIPE_PRICE_STARTER || '',
     pricePro: process.env.STRIPE_PRICE_PRO || '',
     priceEnterprise: process.env.STRIPE_PRICE_ENTERPRISE || '',
   },
@@ -53,6 +54,8 @@ export const config = {
     secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY,
     /** Optional: set for R2 or MinIO (e.g. https://<account>.r2.cloudflarestorage.com) */
     endpoint: process.env.STORAGE_ENDPOINT,
+    /** If set, store files on disk instead of S3 (good for single-VPS). Path relative to cwd or absolute. */
+    localPath: process.env.STORAGE_LOCAL_PATH || '',
   },
 
   redis: {

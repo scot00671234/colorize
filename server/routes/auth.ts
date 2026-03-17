@@ -341,13 +341,17 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
     return
   }
   try {
-    const [userResult, usageResult] = await Promise.all([
+    const [userResult, usageResult, photoCountResult] = await Promise.all([
       pool.query(
-        'SELECT id, email, email_verified_at, created_at, is_pro, COALESCE(is_team, false) AS is_team FROM users WHERE id = $1',
+        'SELECT id, email, email_verified_at, created_at, is_pro, COALESCE(is_team, false) AS is_team, subscription_plan FROM users WHERE id = $1',
         [user.userId]
       ),
       pool.query(
         `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type IN ('rewrite', 'summary') AND timestamp > now() - interval '24 hours'`,
+        [user.userId]
+      ),
+      pool.query<{ count: string }>(
+        'SELECT COUNT(*)::text AS count FROM photo_jobs WHERE user_id = $1',
         [user.userId]
       ),
     ])
@@ -360,6 +364,9 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
     const rewriteLimit = row.is_pro === true ? 500 : 2
     const isTeam = row.is_team === true
     const projectLimit = isTeam ? 100 : (row.is_pro === true ? 10 : 1)
+    const plan = row.subscription_plan ?? null
+    const photoLimit = plan === 'team' ? 400 : plan === 'pro' ? 150 : plan === 'starter' ? 50 : (row.is_pro ? 150 : 0)
+    const photoCount = parseInt(photoCountResult.rows[0]?.count ?? '0', 10)
     res.json({
       user: {
         id: row.id,
@@ -368,9 +375,12 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
         createdAt: row.created_at,
         isPro: !!row.is_pro,
         isTeam: !!isTeam,
+        subscriptionPlan: row.subscription_plan ?? null,
         rewriteCountToday,
         rewriteLimit,
         projectLimit,
+        photoLimit,
+        photoCount,
       },
     })
   } catch (err) {
@@ -394,9 +404,12 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
             createdAt: row.created_at,
             isPro: false,
             isTeam: false,
+            subscriptionPlan: null,
             rewriteCountToday: 0,
             rewriteLimit: 2,
             projectLimit: 1,
+            photoLimit: 0,
+            photoCount: 0,
           },
         })
         return

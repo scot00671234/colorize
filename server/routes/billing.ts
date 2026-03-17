@@ -16,17 +16,27 @@ function billingNotConfigured(res: Response): boolean {
   return false
 }
 
-/** POST /api/auth/create-checkout-session — requires auth. Creates Stripe Checkout for upgrade. */
+/** POST /api/auth/create-checkout-session — requires auth. Creates Stripe Checkout for upgrade. plan: starter | pro | enterprise (team) */
 router.post('/create-checkout-session', requireAuth, async (req: Request, res: Response): Promise<void> => {
   if (billingNotConfigured(res)) return
   const { user } = req as Request & { user: JwtPayload }
   const { plan } = (req.body as { plan?: string }) || {}
-  const isEnterprise = plan === 'enterprise'
-  const priceId = isEnterprise ? config.stripe.priceEnterprise : config.stripe.pricePro
+  const priceId =
+    plan === 'enterprise' || plan === 'team'
+      ? config.stripe.priceEnterprise
+      : plan === 'starter'
+        ? config.stripe.priceStarter
+        : config.stripe.pricePro
+  const envVars: Record<string, string> = {
+    starter: 'STRIPE_PRICE_STARTER',
+    pro: 'STRIPE_PRICE_PRO',
+    enterprise: 'STRIPE_PRICE_ENTERPRISE',
+    team: 'STRIPE_PRICE_ENTERPRISE',
+  }
   if (!priceId) {
-    const envVar = isEnterprise ? 'STRIPE_PRICE_ENTERPRISE' : 'STRIPE_PRICE_PRO'
+    const envVar = envVars[plan as keyof typeof envVars] || 'STRIPE_PRICE_PRO'
     res.status(400).json({
-      error: `Stripe price not configured. Set ${envVar} in .env. In Stripe Dashboard → Products → your product → add a Price, then copy the full Price ID (e.g. price_1ABC123...).`,
+      error: `Stripe price not configured. Set ${envVar} in .env. In Stripe Dashboard → Products → your product → add a recurring Price ($19 / $29 / $59), then copy the full Price ID (e.g. price_1ABC123..., not price_29).`,
     })
     return
   }
@@ -53,7 +63,7 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
     const rawMessage = err instanceof Error ? err.message : 'Failed to create checkout session'
     const isNoSuchPrice = /no such price|resource_missing|Invalid request/i.test(rawMessage)
     const message = isNoSuchPrice
-      ? 'That Stripe Price ID was not found. In Stripe Dashboard go to Products → your product → copy the full Price ID (it looks like price_1ABC123..., not a short value like price_29). Update STRIPE_PRICE_PRO or STRIPE_PRICE_ENTERPRISE in your server env and redeploy.'
+      ? 'That Stripe Price ID was not found. In Stripe Dashboard go to Products → your product → copy the full Price ID (it looks like price_1ABC123..., not a short value like price_29). Update STRIPE_PRICE_STARTER, STRIPE_PRICE_PRO, or STRIPE_PRICE_ENTERPRISE in your server env and redeploy.'
       : rawMessage
     res.status(500).json({ error: `Checkout failed: ${message}` })
   }
@@ -121,56 +131,82 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
     res.status(400).json({ error: 'Invalid signature' })
     return
   }
+  const priceStarter = config.stripe.priceStarter || ''
+  const pricePro = config.stripe.pricePro || ''
   const priceEnterprise = config.stripe.priceEnterprise || ''
 
+  function planFromPriceId(priceId: string): 'starter' | 'pro' | 'team' | null {
+    if (priceEnterprise && priceId === priceEnterprise) return 'team'
+    if (pricePro && priceId === pricePro) return 'pro'
+    if (priceStarter && priceId === priceStarter) return 'starter'
+    return null
+  }
   if (event.type === 'checkout.session.completed' && event.data.object) {
     const session = event.data.object as Stripe.Checkout.Session
     const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id
     const email = session.customer_email || session.customer_details?.email
     if (customerId && email && pool) {
       try {
+        let plan: 'starter' | 'pro' | 'team' | null = null
+        const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id
+        if (subId && stripe) {
+          try {
+            const sub = await stripe.subscriptions.retrieve(subId)
+            const priceId = sub.items?.data?.[0]?.price?.id ?? ''
+            plan = planFromPriceId(priceId)
+          } catch (e) {
+            console.error('Webhook retrieve subscription failed:', e)
+          }
+        }
+        const isTeam = plan === 'team'
         await pool.query(
-          'UPDATE users SET stripe_customer_id = $1, is_pro = true, is_team = false, updated_at = now() WHERE email = $2',
-          [customerId, email.toLowerCase()]
+          'UPDATE users SET stripe_customer_id = $1, is_pro = true, is_team = $2, subscription_plan = $3, updated_at = now() WHERE email = $4',
+          [customerId, isTeam, plan, email.toLowerCase()]
         )
       } catch (err) {
         console.error('Webhook update stripe_customer_id failed:', err)
       }
     }
   }
-  function subscriptionTier(sub: Stripe.Subscription): { isPro: boolean; isTeam: boolean } {
+  function subscriptionTier(sub: Stripe.Subscription): { isPro: boolean; isTeam: boolean; plan: 'starter' | 'pro' | 'team' | null } {
     const priceId = sub.items?.data?.[0]?.price?.id ?? ''
     const isTeam = !!priceEnterprise && priceId === priceEnterprise
     const isPro = sub.status === 'active'
-    return { isPro, isTeam: isPro && isTeam }
+    let plan: 'starter' | 'pro' | 'team' | null = null
+    if (isPro) {
+      if (priceEnterprise && priceId === priceEnterprise) plan = 'team'
+      else if (pricePro && priceId === pricePro) plan = 'pro'
+      else if (priceStarter && priceId === priceStarter) plan = 'starter'
+    }
+    return { isPro, isTeam: isPro && isTeam, plan }
   }
   if (event.type === 'customer.subscription.created' && event.data.object) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-    const { isPro, isTeam } = subscriptionTier(sub)
+    const { isPro, isTeam, plan } = subscriptionTier(sub)
     if (customerId && pool) {
       try {
         await pool.query(
-          'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
-          [isPro, isTeam, customerId]
+          'UPDATE users SET is_pro = $1, is_team = $2, subscription_plan = $3, updated_at = now() WHERE stripe_customer_id = $4',
+          [isPro, isTeam, plan, customerId]
         )
       } catch (err) {
-        console.error('Webhook subscription.created is_pro/is_team failed:', err)
+        console.error('Webhook subscription.created is_pro/is_team/plan failed:', err)
       }
     }
   }
   if (event.type === 'customer.subscription.updated' && event.data.object) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-    const { isPro, isTeam } = subscriptionTier(sub)
+    const { isPro, isTeam, plan } = subscriptionTier(sub)
     if (customerId && pool) {
       try {
         await pool.query(
-          'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
-          [isPro, isTeam, customerId]
+          'UPDATE users SET is_pro = $1, is_team = $2, subscription_plan = $3, updated_at = now() WHERE stripe_customer_id = $4',
+          [isPro, isTeam, plan, customerId]
         )
       } catch (err) {
-        console.error('Webhook subscription.updated is_pro/is_team failed:', err)
+        console.error('Webhook subscription.updated is_pro/is_team/plan failed:', err)
       }
     }
   }
@@ -180,7 +216,7 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
     if (customerId && pool) {
       try {
         await pool.query(
-          'UPDATE users SET is_pro = false, is_team = false, updated_at = now() WHERE stripe_customer_id = $1',
+          'UPDATE users SET is_pro = false, is_team = false, subscription_plan = NULL, updated_at = now() WHERE stripe_customer_id = $1',
           [customerId]
         )
       } catch (err) {

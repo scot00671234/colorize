@@ -17,6 +17,17 @@ export function clearToken(): void {
 
 export type ApiError = { error: string; code?: string }
 
+export type Job = {
+  id: string
+  type: string
+  status: string
+  inputUrl: string | null
+  outputUrl: string | null
+  error_message: string | null
+  created_at: string
+  updated_at: string
+}
+
 function buildUrl(path: string, params?: Record<string, string>): string {
   if (path.startsWith('http')) return path
   if (!API_BASE) {
@@ -97,7 +108,7 @@ export const api = {
       }),
 
     me: () =>
-      request<{ user: { id: string; email: string; emailVerified: boolean; createdAt: string; isPro?: boolean; isTeam?: boolean; rewriteCountToday?: number; rewriteLimit?: number; projectLimit?: number } }>('/api/auth/me'),
+      request<{ user: { id: string; email: string; emailVerified: boolean; createdAt: string; isPro?: boolean; isTeam?: boolean; subscriptionPlan?: string | null; rewriteCountToday?: number; rewriteLimit?: number; projectLimit?: number; photoLimit?: number; photoCount?: number } }>('/api/auth/me'),
 
     deleteAccount: () =>
       request<{ message: string }>('/api/auth/account', { method: 'DELETE' }),
@@ -114,9 +125,11 @@ export const api = {
 
   jobs: {
     list: () =>
-      request<{ jobs: { id: string; type: string; status: string; inputUrl: string | null; outputUrl: string | null; error_message: string | null; created_at: string; updated_at: string }[] }>('/api/jobs'),
+      request<{ jobs: Job[]; photoLimit: number; photoCount: number }>('/api/jobs'),
     get: (id: string) =>
       request<{ id: string; type: string; status: string; inputUrl: string | null; outputUrl: string | null; error_message: string | null; created_at: string; updated_at: string }>(`/api/jobs/${id}`),
+    delete: (id: string) =>
+      request<void>(`/api/jobs/${id}`, { method: 'DELETE' }),
     create: (file: File, type?: 'colorize' | 'restore') => {
       const url = buildUrl('/api/jobs')
       const headers: HeadersInit = { Authorization: `Bearer ${getToken()}` }

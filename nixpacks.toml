@@ -4,4 +4,6 @@
 nixPkgs = ["nodejs_20", "npm-9_x"]
 
 [phases.install]
-cmds = ["npm install --no-optional"]
+# Rollup (via Vite) relies on platform-specific optional deps (e.g. @rollup/rollup-linux-x64-gnu).
+# Using --no-optional can break builds in Linux containers.
+cmds = ["npm ci"]

@@ -38,6 +38,9 @@
 
   --hero-panel-bg: rgba(255, 255, 255, 0.08);
   --hero-panel-border: rgba(255, 255, 255, 0.2);
+
+  /* CTA button border — thin metallic silver */
+  --border-cta-silver: 1px solid rgba(168, 176, 192, 0.9);
 }
 
 /* Dark theme */
@@ -72,6 +75,9 @@
   --hero-panel-border: rgba(255, 255, 255, 0.06);
 
   --danger-text: #e8a0a0;
+
+  /* CTA button border — thin metallic silver (lighter so it pops on dark) */
+  --border-cta-silver: 1px solid rgba(200, 208, 224, 0.65);
 }
 
 * {

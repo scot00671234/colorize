@@ -23,7 +23,7 @@ export default function Privacy() {
             You may access, correct, or delete your personal data through your account settings or by contacting us.
           </p>
           <p>
-            For questions about this policy, contact us at privacy@resumeai.example.
+            For questions about this policy, contact us at <a href="mailto:bioqz@outlook.com" className="contentLink">bioqz@outlook.com</a>.
           </p>
         </div>
         <Link to="/" className="contentBack">← Back to home</Link>

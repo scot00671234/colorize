@@ -12,11 +12,7 @@ export default function Contact() {
           </p>
           <p>
             <strong>Email</strong><br />
-            support@bioqz.com
-          </p>
-          <p>
-            <strong>General inquiries</strong><br />
-            hello@bioqz.com
+            <a href="mailto:bioqz@outlook.com" className="contentLink">bioqz@outlook.com</a>
           </p>
           <p>
             We typically respond within one business day.

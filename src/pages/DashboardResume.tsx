@@ -64,7 +64,9 @@ export default function DashboardResume() {
   const [landingRewriteLoading, setLandingRewriteLoading] = useState(false)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
   const editorRef = useRef<ResumeEditorHandle>(null)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
 
   const handleEditorChange = useCallback((html: string, text: string) => {
     setEditorContent(html)
@@ -117,29 +119,68 @@ export default function DashboardResume() {
     }
   }, [editorText, jobDescription])
 
-  const handleExport = useCallback(async () => {
-    setExportError(null)
-    const contentToExport = editorRef.current?.getExportText?.() ?? editorText
+  const getContentToExport = useCallback(() => editorRef.current?.getExportText?.() ?? editorText, [editorText])
+
+  const downloadBlob = useCallback((blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [])
+
+  const handleExportPdf = useCallback(async () => {
+    setExportMenuOpen(false)
+    const contentToExport = getContentToExport()
     if (!contentToExport?.trim()) {
       setExportError('Add content before exporting.')
       return
     }
+    setExportError(null)
     setExportLoading(true)
     try {
       const blob = await api.resume.exportPdf(contentToExport)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = editorMode === 'job_application' ? 'application.pdf' : 'resume.pdf'
-      a.click()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, editorMode === 'job_application' ? 'application.pdf' : 'resume.pdf')
       await refreshUser()
     } catch (err) {
       setExportError(err instanceof Error ? err.message : 'Export failed. Please try again.')
     } finally {
       setExportLoading(false)
     }
-  }, [editorText, editorMode, refreshUser])
+  }, [getContentToExport, editorMode, downloadBlob, refreshUser])
+
+  const handleExportDocx = useCallback(async () => {
+    setExportMenuOpen(false)
+    const contentToExport = getContentToExport()
+    if (!contentToExport?.trim()) {
+      setExportError('Add content before exporting.')
+      return
+    }
+    setExportError(null)
+    setExportLoading(true)
+    try {
+      const blob = await api.resume.exportDocx(contentToExport)
+      downloadBlob(blob, editorMode === 'job_application' ? 'application.docx' : 'resume.docx')
+      await refreshUser()
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : 'Export failed. Please try again.')
+    } finally {
+      setExportLoading(false)
+    }
+  }, [getContentToExport, editorMode, downloadBlob, refreshUser])
+
+  const handleExportText = useCallback(() => {
+    setExportMenuOpen(false)
+    const contentToExport = getContentToExport()
+    if (!contentToExport?.trim()) {
+      setExportError('Add content before exporting.')
+      return
+    }
+    setExportError(null)
+    const blob = new Blob([contentToExport], { type: 'text/plain;charset=utf-8' })
+    downloadBlob(blob, editorMode === 'job_application' ? 'application.txt' : 'resume.txt')
+  }, [getContentToExport, editorMode, downloadBlob])
 
   const handleGenerateSummary = useCallback(async () => {
     if (!editorText?.trim() || editorText.trim().length < 50) {
@@ -205,6 +246,15 @@ export default function DashboardResume() {
       setUploadLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    if (!exportMenuOpen) return
+    const onOutside = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) setExportMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [exportMenuOpen])
 
   useEffect(() => {
     const pending = getPendingRewrite()
@@ -295,8 +345,8 @@ export default function DashboardResume() {
           <h2 className="resumeStepTitle">{editorMode === 'resume' ? 'Your resume' : 'Your application'}</h2>
           <p className="resumeStepHint">
             {editorMode === 'resume'
-              ? 'Upload a file or paste your resume. Use the toolbar to format (headings, bold, bullets). Select text and click Rewrite to improve it with AI.'
-              : 'Paste your cover letter or application answers. Use the toolbar to format. Select text and click Rewrite; the AI will adapt to job application tone.'}
+              ? 'Upload a file or paste your resume. Use the toolbar to format (Title H1, Section H2, bold, bullets). Select text and click Rewrite to improve it with AI. Export to PDF, Word, or Text when ready.'
+              : 'Paste your cover letter or application answers. Use the toolbar to format. Select text and click Rewrite; the AI will adapt to job application tone. Export to PDF, Word, or Text when ready.'}
           </p>
           <div className="resumeToolbar">
             <input
@@ -336,14 +386,33 @@ export default function DashboardResume() {
             >
               {rewriteLoading ? 'Rewriting…' : 'Rewrite selection'}
             </button>
-            <button
-              type="button"
-              className="dashboardBtn dashboardBtnSecondary"
-              onClick={handleExport}
-              disabled={exportLoading || !editorText.trim()}
-            >
-              {exportLoading ? 'Exporting…' : 'Export PDF'}
-            </button>
+            <div className="resumeExportWrap" ref={exportMenuRef}>
+              <button
+                type="button"
+                className="dashboardBtn dashboardBtnSecondary"
+                onClick={() => setExportMenuOpen((o) => !o)}
+                disabled={exportLoading || !editorText.trim()}
+                aria-expanded={exportMenuOpen}
+                aria-haspopup="true"
+                aria-label="Export document"
+              >
+                {exportLoading ? 'Exporting…' : 'Export'}
+              </button>
+              {exportMenuOpen && (
+                <div className="resumeExportDropdown" role="menu">
+                  <button type="button" className="resumeExportItem" role="menuitem" onClick={handleExportPdf} disabled={exportLoading}>
+                    PDF
+                  </button>
+                  <button type="button" className="resumeExportItem" role="menuitem" onClick={handleExportDocx} disabled={exportLoading}>
+                    Word (.docx)
+                  </button>
+                  <button type="button" className="resumeExportItem" role="menuitem" onClick={handleExportText}>
+                    Text (.txt)
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="resumeExportHint">PDF, Word, or Text. Upload the Word file to Google Docs if you use it.</p>
           </div>
           <details className="resumeRewriteOptionsDetails">
             <summary className="resumeRewriteOptionsSummary">Rewrite options (style, language & instructions)</summary>
@@ -402,6 +471,9 @@ export default function DashboardResume() {
               content={editorContent}
               onChange={handleEditorChange}
             />
+            <p className="resumeEditorWordCount" aria-live="polite">
+              {editorText.trim() ? `${editorText.trim().split(/\s+/).filter(Boolean).length} words` : '0 words'}
+            </p>
           </div>
         </section>
 

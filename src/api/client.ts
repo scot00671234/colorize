@@ -156,5 +156,10 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ content }),
       }),
+    exportDocx: (content: string) =>
+      requestBlob('/api/resume/export-docx', {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      }),
   },
 }

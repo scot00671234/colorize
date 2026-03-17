@@ -122,6 +122,18 @@ export default function DashboardSettings() {
       </section>
 
       <section className="dashboardSettingsSection">
+        <h2 className="dashboardSettingsHeading">Contact us</h2>
+        <div className="dashboardCard">
+          <p className="dashboardSettingsHint">
+            Questions, feedback, or support? Reach us by email.
+          </p>
+          <a href="mailto:bioqz@outlook.com" className="dashboardSettingsContactLink">
+            bioqz@outlook.com
+          </a>
+        </div>
+      </section>
+
+      <section className="dashboardSettingsSection">
         <h2 className="dashboardSettingsHeading dashboardSettingsHeadingDanger">Delete account</h2>
         <div className="dashboardCard dashboardCardDanger">
           {!confirmDelete ? (

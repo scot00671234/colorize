@@ -122,9 +122,17 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
       <div className="resumeEditorToolbar">
         <button
           type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={editor.isActive('heading', { level: 1 }) ? 'resumeEditorBtnActive' : ''}
+          title="Title (e.g. your name)"
+        >
+          H1
+        </button>
+        <button
+          type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           className={editor.isActive('heading', { level: 2 }) ? 'resumeEditorBtnActive' : ''}
-          title="Section heading"
+          title="Section (e.g. Experience, Education)"
         >
           H2
         </button>
@@ -132,7 +140,7 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           className={editor.isActive('heading', { level: 3 }) ? 'resumeEditorBtnActive' : ''}
-          title="Subheading"
+          title="Subsection"
         >
           H3
         </button>

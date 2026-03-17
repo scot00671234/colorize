@@ -6,7 +6,7 @@ const PATH_STEPS = [
   { id: 1, title: 'One document opens the door', body: 'Recruiters decide in or out from one thing: your resume. Not luck, not timing. The words on the page.' },
   { id: 2, title: 'Get past the gate', body: 'Most applications never reach a human. The right wording gets you past the screeners and into the room.' },
   { id: 3, title: 'Speak their language', body: 'Sharp bullets and strong verbs. The language hiring managers notice. Sound like the candidate they want to hire.' },
-  { id: 4, title: 'The job. The life.', body: 'The right resume opens doors. It can change your whole trajectory. The job you want starts here.' },
+  { id: 4, title: 'The job. The life.', body: 'A strong resume changes your trajectory. The job you want starts here.' },
 ] as const
 
 function BlobTop() {

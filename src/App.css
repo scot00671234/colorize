@@ -88,7 +88,7 @@
   background: var(--glass-bg-strong);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
+  border: var(--border-cta-silver);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
   font-weight: 500;
@@ -343,7 +343,7 @@
   padding: 0.75rem 1.75rem;
   background: var(--glass-bg-strong);
   backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
+  border: var(--border-cta-silver);
   border-radius: var(--radius-full);
   font-size: 0.9375rem;
   font-weight: 500;
@@ -404,7 +404,7 @@
   letter-spacing: -0.02em;
   color: var(--text-primary);
   text-align: center;
-  margin: 0 0 3rem;
+  margin: 0 0 3.5rem;
 }
 
 .pathSteps {
@@ -413,7 +413,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 4rem;
   padding: 0 1rem;
 }
 
@@ -644,21 +644,23 @@
   width: 100%;
   padding: 1rem 1.75rem;
   margin-top: 0.5rem;
-  font-size: 1.0625rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: var(--btn-primary-text);
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
   cursor: pointer;
-  box-shadow: 0 4px 14px -2px rgba(90, 122, 138, 0.35);
+  box-shadow: var(--shadow-glass);
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .landingTryCta:hover {
-  background: var(--accent-strong);
-  box-shadow: 0 6px 20px -4px rgba(90, 122, 138, 0.4);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--shadow-glass-hover);
   transform: translateY(-1px);
 }
 
@@ -1218,6 +1220,16 @@
   margin-top: 0;
 }
 
+.contentLink {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contentLink:hover {
+  text-decoration: underline;
+}
+
 .contentBack {
   display: inline-block;
   margin-top: 2rem;
@@ -1581,6 +1593,18 @@
   gap: 0.75rem;
 }
 
+.dashboardSettingsContactLink {
+  display: inline-block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.dashboardSettingsContactLink:hover {
+  text-decoration: underline;
+}
+
 .dashboardBtn {
   padding: 0.5rem 1.25rem;
   font-size: 0.875rem;
@@ -1841,12 +1865,73 @@
   margin-bottom: 0.75rem;
 }
 
+.resumeExportWrap {
+  position: relative;
+}
+
+.resumeExportDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 2px;
+  min-width: 10rem;
+  padding: 0.25rem;
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-glass);
+  z-index: 20;
+}
+
+.resumeExportItem {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.resumeExportItem:hover {
+  background: var(--accent-soft);
+}
+
+.resumeExportItem:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.resumeExportHint {
+  flex-basis: 100%;
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .resumeErrors {
   margin-bottom: 0.75rem;
 }
 
 .resumeEditorWrap {
   margin-top: 0.5rem;
+}
+
+.resumeEditorWrap .resumeEditor {
+  max-width: 52rem;
+}
+
+.resumeEditorWordCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 
 .resumeScoreCard .resumeScore {
@@ -1978,12 +2063,13 @@
 }
 
 .resumeEditor .ProseMirror {
-  min-height: 280px;
-  padding: 1rem 1rem 1.25rem;
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  min-height: 420px;
+  padding: 1.25rem 1.5rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.65;
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
+  max-width: 100%;
 }
 
 .resumeEditor .ProseMirror:focus {
@@ -2000,6 +2086,14 @@
   margin-bottom: 0.5rem;
 }
 
+.resumeEditor .ProseMirror h1 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
 .resumeEditor .ProseMirror h2 {
   font-size: 1.125rem;
   font-weight: 600;
@@ -2007,7 +2101,8 @@
   color: var(--text-primary);
 }
 
-.resumeEditor .ProseMirror h2:first-child {
+.resumeEditor .ProseMirror h2:first-child,
+.resumeEditor .ProseMirror h1:first-child {
   margin-top: 0;
 }
 

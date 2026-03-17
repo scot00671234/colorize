@@ -8,7 +8,7 @@ export default function Terms() {
         <p className="contentSubtitle">Last updated: {new Date().toLocaleDateString('en-US')}</p>
         <div className="contentBody">
           <p>
-            By using bioqz, you agree to these terms. Please read them carefully.
+            By using Colorize (this service), you agree to these terms. Please read them carefully.
           </p>
           <h2>Acceptance</h2>
           <p>
@@ -16,7 +16,7 @@ export default function Terms() {
           </p>
           <h2>Use of the service</h2>
           <p>
-            You agree to use the service only for lawful purposes and in accordance with these terms. You are responsible for keeping your account credentials secure and for all activity under your account.
+            Colorize provides AI-powered photo colorization and restoration. You agree to use the service only for lawful purposes and in accordance with these terms. You are responsible for keeping your account credentials secure and for all activity under your account. Do not upload content you do not have the right to use.
           </p>
           <h2>Account termination</h2>
           <p>

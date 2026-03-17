@@ -25,10 +25,10 @@ export default function DashboardHome() {
   return (
     <div className="dashboardPage dashboardPageOverview">
       <h1 className="dashboardPageTitle">Dashboard</h1>
-      <p className="dashboardPageSubtitle">Welcome back. Build and refine your resume, then score it and export to PDF.</p>
+      <p className="dashboardPageSubtitle">Manage your account and colorize old photos.</p>
       <div className="dashboardCard dashboardOverviewCard">
         <p className="dashboardCardText">
-          Go to <Link to="/dashboard/resume" className="dashboardCardLink">Editor</Link> to paste your resume, add a job description, rewrite bullets with AI, get an ATS score, and export a clean PDF.
+          Go to <Link to="/dashboard/colorize" className="dashboardCardLink">Colorize</Link> to upload a black & white or damaged photo. Our AI will colorize or restore it; you can download the result from your job history.
         </p>
       </div>
       <section className="dashboardCard" aria-label="Your projects">
@@ -38,15 +38,15 @@ export default function DashboardHome() {
           <p className="dashboardCardText">Loading…</p>
         ) : projects.length === 0 ? (
           <p className="dashboardCardText">
-            No projects yet. <Link to="/dashboard/resume" className="dashboardCardLink">Open the Editor</Link> and save your first resume or application.
+            No projects yet.
           </p>
         ) : (
           <ul className="dashboardProjectList">
             {projects.map((p) => (
               <li key={p.id}>
-                <Link to={`/dashboard/resume?projectId=${p.id}`} className="dashboardCardLink">
+                <span className="dashboardCardLink">
                   {p.title || 'Untitled'}
-                </Link>
+                </span>
                 <span className="dashboardProjectMeta">
                   Updated {new Date(p.updated_at).toLocaleDateString()}
                 </span>
@@ -55,7 +55,7 @@ export default function DashboardHome() {
           </ul>
         )}
         <p className="dashboardCardText dashboardProjectLimit">
-          Project limit: {projects.length} / {limit} (Free: 1, Pro: 10, Team: 100)
+          Project limit: {projects.length} / {limit} (Free: 1, Pro: 10, Team: 100). Upgrade in Settings for more.
         </p>
       </section>
     </div>

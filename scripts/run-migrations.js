@@ -1,5 +1,5 @@
 /**
- * Runs server/schema.sql and server/migrations/002_resume_builder.sql and 003_password_reset.sql
+ * Runs server/schema.sql and server/migrations/002, 003, 004 (usage, password reset, projects).
  * using DATABASE_URL from .env. No psql required.
  */
 import 'dotenv/config'
@@ -31,11 +31,13 @@ export async function runMigrations() {
     console.log('Running server/schema.sql...')
     await runFile('server/schema.sql')
     console.log('Running server/migrations/002_resume_builder.sql...')
-    await runFile('server/migrations/002_resume_builder.sql')
+    await runFile('server/migrations/002_resume_builder.sql') // usage_logs, is_pro
     console.log('Running server/migrations/003_password_reset.sql...')
     await runFile('server/migrations/003_password_reset.sql')
     console.log('Running server/migrations/004_projects.sql...')
     await runFile('server/migrations/004_projects.sql')
+    console.log('Running server/migrations/005_photo_jobs.sql...')
+    await runFile('server/migrations/005_photo_jobs.sql')
     console.log('Migrations done.')
   } finally {
     await client.end()

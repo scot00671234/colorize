@@ -1,11 +1,9 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../api/client'
 
 export default function Register() {
-  const location = useLocation()
-  const fromLandingTry = (location.state as { fromLandingTry?: boolean })?.fromLandingTry
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [sent, setSent] = useState(false)
@@ -66,7 +64,7 @@ export default function Register() {
       <div className="authCard">
         <h1 className="authTitle">Create account</h1>
         <p className="authSubtitle">
-          {fromLandingTry ? 'Sign up to see your AI rewrite. Free—no credit card required.' : 'Get started with a free account.'}
+          Get started with a free account. Colorize your old photos—no credit card required.
         </p>
         {error && <div className="authError" role="alert">{error}</div>}
         <form onSubmit={handleSubmit} className="authForm">

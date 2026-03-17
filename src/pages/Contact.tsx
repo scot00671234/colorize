@@ -12,7 +12,7 @@ export default function Contact() {
           </p>
           <p>
             <strong>Email</strong><br />
-            <a href="mailto:bioqz@outlook.com" className="contentLink">bioqz@outlook.com</a>
+            <a href="mailto:support@yourdomain.com" className="contentLink">support@yourdomain.com</a>
           </p>
           <p>
             We typically respond within one business day.

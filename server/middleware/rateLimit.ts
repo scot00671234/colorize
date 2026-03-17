@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit'
 
-/** 1 request per second per IP for AI and resume routes */
+/** 1 request per second per IP for API routes */
 export const aiRateLimiter = rateLimit({
   windowMs: 1000,
   max: 1,

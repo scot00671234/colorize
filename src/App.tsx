@@ -9,7 +9,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import DashboardLayout from './components/DashboardLayout'
 import DashboardHome from './pages/DashboardHome'
-import DashboardResume from './pages/DashboardResume'
+import DashboardColorize from './pages/DashboardColorize'
 import DashboardSettings from './pages/DashboardSettings'
 import Contact from './pages/Contact'
 import Privacy from './pages/Privacy'
@@ -27,7 +27,7 @@ function Nav() {
       <div className="navInner">
         <Link to="/" className="navBrand">
           <img src="/logo.svg" alt="" className="navLogo" width="28" height="28" />
-          <span>bioqz</span>
+          <span>Colorize</span>
         </Link>
         <div className="navLinks">
           <a href="/#about">About</a>
@@ -68,7 +68,7 @@ function App() {
         <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index element={<DashboardHome />} />
-          <Route path="resume" element={<DashboardResume />} />
+          <Route path="colorize" element={<DashboardColorize />} />
           <Route path="settings" element={<DashboardSettings />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

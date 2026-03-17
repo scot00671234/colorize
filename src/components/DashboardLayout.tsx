@@ -5,7 +5,7 @@ import ThemeToggle from './ThemeToggle'
 
 const SEARCH_ITEMS = [
   { label: 'Dashboard', path: '' },
-  { label: 'Editor', path: '/resume' },
+  { label: 'Colorize', path: '/colorize' },
   { label: 'Settings', path: '/settings' },
 ]
 
@@ -80,7 +80,7 @@ export default function DashboardLayout() {
         <div className={`dashboardSidebarContent ${sidebarOpen ? '' : 'dashboardSidebarContent--hidden'}`}>
         <Link to={basePath} className="dashboardBrand">
           <img src="/logo.svg" alt="" className="dashboardLogo" width="24" height="24" />
-          <span className="dashboardBrandText">bioqz</span>
+          <span className="dashboardBrandText">Colorize</span>
         </Link>
 
         <nav className="dashboardNav">
@@ -91,10 +91,10 @@ export default function DashboardLayout() {
             Dashboard
           </Link>
           <Link
-            to={`${basePath}/resume`}
-            className={`dashboardNavLink ${location.pathname === `${basePath}/resume` ? 'dashboardNavLinkActive' : ''}`}
+            to={`${basePath}/colorize`}
+            className={`dashboardNavLink ${location.pathname === `${basePath}/colorize` ? 'dashboardNavLinkActive' : ''}`}
           >
-            Editor
+            Colorize
           </Link>
           <Link
             to={`${basePath}/settings`}

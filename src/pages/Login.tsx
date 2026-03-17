@@ -1,7 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { hasPendingRewrite } from '../utils/landingPendingRewrite'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -19,7 +18,7 @@ export default function Login() {
     try {
       await login(email, password)
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname
-      const goTo = from && from.startsWith('/dashboard') ? from : (hasPendingRewrite() ? '/dashboard/resume' : '/dashboard')
+      const goTo = from && from.startsWith('/dashboard') ? from : '/dashboard'
       navigate(goTo, { replace: true })
     } catch (err) {
       // error set in context if API returns message

@@ -73,14 +73,14 @@ export default function DashboardSettings() {
         <div className="dashboardCard">
           <p className="dashboardSettingsPlan">
             Current plan: <strong>{isPro ? 'Pro' : 'Free'}</strong>
-            {isPro && user?.rewriteLimit != null && (
-              <span className="dashboardSettingsPlanHint"> — {user.rewriteLimit} rewrites/day</span>
+            {isPro && user?.projectLimit != null && (
+              <span className="dashboardSettingsPlanHint"> — {user.projectLimit} projects</span>
             )}
           </p>
           <p className="dashboardSettingsHint">
             {isPro
               ? 'Billing is managed with Stripe. Use the portal to update payment or cancel your subscription.'
-              : 'Choose a plan for more daily rewrites. Billing is managed with Stripe.'}
+              : 'Upgrade to Pro for more photo colorizations per month and restoration. Billing is managed with Stripe.'}
           </p>
           {billingError && <p className="dashboardSettingsError">{billingError}</p>}
           <div className="dashboardSettingsActions">
@@ -137,8 +137,8 @@ export default function DashboardSettings() {
           <p className="dashboardSettingsHint">
             Questions, feedback, or support? Reach us by email.
           </p>
-          <a href="mailto:bioqz@outlook.com" className="dashboardSettingsContactLink">
-            bioqz@outlook.com
+          <a href="mailto:support@yourdomain.com" className="dashboardSettingsContactLink">
+            support@yourdomain.com
           </a>
         </div>
       </section>

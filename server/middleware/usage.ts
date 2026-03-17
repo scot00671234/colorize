@@ -1,19 +1,41 @@
 import { Request, Response, NextFunction } from 'express'
 import { pool } from '../db'
 import type { JwtPayload } from './auth'
-import {
-  isLockedOut,
-  setLockout,
-  isSuspended,
-  setSuspended,
-  getLockoutRemaining,
-  recordJobDescHash,
-  hashJobDesc,
-} from '../services/jobDescCache'
+
+// In-memory lockout/suspend (for future AI rate limits)
+const lockoutUntil = new Map<string, number>()
+const suspendedUsers = new Set<string>()
+
+function isLockedOut(userId: string): boolean {
+  const until = lockoutUntil.get(userId)
+  if (!until) return false
+  if (Date.now() >= until) {
+    lockoutUntil.delete(userId)
+    return false
+  }
+  return true
+}
+
+function setLockout(userId: string, seconds = 300): void {
+  lockoutUntil.set(userId, Date.now() + seconds * 1000)
+}
+
+function isSuspended(userId: string): boolean {
+  return suspendedUsers.has(userId)
+}
+
+function setSuspended(userId: string): void {
+  suspendedUsers.add(userId)
+}
+
+function getLockoutRemaining(userId: string): number {
+  const until = lockoutUntil.get(userId)
+  if (!until) return 0
+  return Math.max(0, Math.ceil((until - Date.now()) / 1000))
+}
 
 const DAILY_CAP_FREE = 2
 const DAILY_CAP_PRO = 500
-const REWRITE_BURST_WINDOW_MS = 60 * 1000
 const REWRITE_BURST_MAX = 20
 const DAILY_REWRITE_SUSPEND = 1000
 
@@ -68,7 +90,7 @@ export async function checkRewriteLimits(req: Request, res: Response, next: Next
       return
     }
     if (burst >= REWRITE_BURST_MAX) {
-      setLockout(userId)
+      setLockout(userId, 300)
       res.status(429).set('Retry-After', '300').json({ error: 'Slow down—optimizing for quality.' })
       return
     }
@@ -84,23 +106,6 @@ export async function checkRewriteLimits(req: Request, res: Response, next: Next
     console.error('checkRewriteLimits:', err)
     res.status(500).json({ error: 'Something went wrong. Please try again.' })
   }
-}
-
-/** Check job-desc cooldown for score (same hash >10 in 24h). Optionally pass jobDescription in body. */
-export function checkScoreCooldown(req: Request, res: Response, next: NextFunction): void {
-  const { user } = req as Request & { user: JwtPayload }
-  const jobDescription = (req.body as { jobDescription?: string })?.jobDescription
-  if (!jobDescription || typeof jobDescription !== 'string') {
-    next()
-    return
-  }
-  const hash = hashJobDesc(jobDescription)
-  const { cooldown } = recordJobDescHash(user.userId, hash)
-  if (cooldown) {
-    res.status(429).set('Retry-After', '30').json({ error: 'Too many requests with the same job description. Please wait 30 seconds.' })
-    return
-  }
-  next()
 }
 
 /** Insert a usage_log row. Call from route handler after success. */

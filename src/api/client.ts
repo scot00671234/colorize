@@ -61,27 +61,6 @@ async function request<T>(
   return res.json() as Promise<T>
 }
 
-async function requestBlob(
-  path: string,
-  options: RequestInit & { params?: Record<string, string>; body?: string } = {}
-): Promise<Blob> {
-  const { params, body, ...init } = options
-  const url = buildUrl(path, params)
-  const headers: HeadersInit = { ...(init.headers as Record<string, string>) }
-  if (body && !headers['Content-Type']) headers['Content-Type'] = 'application/json'
-  const token = getToken()
-  if (token) headers['Authorization'] = `Bearer ${token}`
-
-  const res = await fetch(url, { ...init, headers, body })
-  if (!res.ok) {
-    if (res.status === 401) clearToken()
-    const data = await res.json().catch(() => ({})) as ApiError
-    const message = typeof data?.error === 'string' ? data.error : res.statusText || 'Request failed'
-    throw new Error(message)
-  }
-  return res.blob()
-}
-
 export const api = {
   auth: {
     register: (email: string, password: string) =>
@@ -133,35 +112,26 @@ export const api = {
       request<{ url: string }>('/api/auth/create-portal-session', { method: 'POST', body: '{}' }),
   },
 
-  ai: {
-    rewrite: (text: string, options?: { language?: string; context?: string; tone?: string; mode?: 'resume' | 'job_application' }) =>
-      request<{ rewritten: string; tokensUsed?: number }>('/api/ai/rewrite', {
-        method: 'POST',
-        body: JSON.stringify({ text, language: options?.language, context: options?.context, tone: options?.tone, mode: options?.mode }),
-      }),
-    summary: (resumeText: string, options?: { jobDescription?: string; mode?: 'resume' | 'job_application' }) =>
-      request<{ summary: string }>('/api/ai/summary', {
-        method: 'POST',
-        body: JSON.stringify({ resumeText, jobDescription: options?.jobDescription, mode: options?.mode }),
-      }),
-    score: (resumeText: string, jobDescription: string) =>
-      request<{ score: number; breakdown?: Record<string, number>; keywords?: string[] }>('/api/ai/score', {
-        method: 'POST',
-        body: JSON.stringify({ resumeText, jobDescription }),
-      }),
-  },
-
-  resume: {
-    exportPdf: (content: string) =>
-      requestBlob('/api/resume/export-pdf', {
-        method: 'POST',
-        body: JSON.stringify({ content }),
-      }),
-    exportDocx: (content: string) =>
-      requestBlob('/api/resume/export-docx', {
-        method: 'POST',
-        body: JSON.stringify({ content }),
-      }),
+  jobs: {
+    list: () =>
+      request<{ jobs: { id: string; type: string; status: string; inputUrl: string | null; outputUrl: string | null; error_message: string | null; created_at: string; updated_at: string }[] }>('/api/jobs'),
+    get: (id: string) =>
+      request<{ id: string; type: string; status: string; inputUrl: string | null; outputUrl: string | null; error_message: string | null; created_at: string; updated_at: string }>(`/api/jobs/${id}`),
+    create: (file: File, type?: 'colorize' | 'restore') => {
+      const url = buildUrl('/api/jobs')
+      const headers: HeadersInit = { Authorization: `Bearer ${getToken()}` }
+      const form = new FormData()
+      form.append('image', file)
+      if (type) form.append('type', type)
+      return fetch(url, { method: 'POST', headers, body: form }).then(async (res) => {
+        if (!res.ok) {
+          if (res.status === 401) clearToken()
+          const data = await res.json().catch(() => ({})) as ApiError
+          throw new Error(typeof data?.error === 'string' ? data.error : res.statusText || 'Request failed')
+        }
+        return res.json() as Promise<{ id: string; type: string; status: string; inputUrl: string | null; createdAt: string }>
+      })
+    },
   },
 
   projects: {

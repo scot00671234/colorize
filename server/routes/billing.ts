@@ -21,10 +21,12 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
   if (billingNotConfigured(res)) return
   const { user } = req as Request & { user: JwtPayload }
   const { plan } = (req.body as { plan?: string }) || {}
-  const priceId = plan === 'enterprise' ? config.stripe.priceEnterprise : config.stripe.pricePro
+  const isEnterprise = plan === 'enterprise'
+  const priceId = isEnterprise ? config.stripe.priceEnterprise : config.stripe.pricePro
   if (!priceId) {
+    const envVar = isEnterprise ? 'STRIPE_PRICE_ENTERPRISE' : 'STRIPE_PRICE_PRO'
     res.status(400).json({
-      error: 'Stripe price not configured. Set STRIPE_PRICE_PRO in .env (see .env.example). Create a Product and Price in Stripe Dashboard → Products, then copy the Price ID.',
+      error: `Stripe price not configured. Set ${envVar} in .env. In Stripe Dashboard → Products → your product → add a Price, then copy the full Price ID (e.g. price_1ABC123...).`,
     })
     return
   }
@@ -48,7 +50,11 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
     res.json({ url: session.url })
   } catch (err) {
     console.error('Create checkout session error:', err)
-    const message = err instanceof Error ? err.message : 'Failed to create checkout session'
+    const rawMessage = err instanceof Error ? err.message : 'Failed to create checkout session'
+    const isNoSuchPrice = /no such price|resource_missing|Invalid request/i.test(rawMessage)
+    const message = isNoSuchPrice
+      ? 'That Stripe Price ID was not found. In Stripe Dashboard go to Products → your product → copy the full Price ID (it looks like price_1ABC123..., not a short value like price_29). Update STRIPE_PRICE_PRO or STRIPE_PRICE_ENTERPRISE in your server env and redeploy.'
+      : rawMessage
     res.status(500).json({ error: `Checkout failed: ${message}` })
   }
 })

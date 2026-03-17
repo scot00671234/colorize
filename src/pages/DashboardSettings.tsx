@@ -10,7 +10,7 @@ export default function DashboardSettings() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [billingLoading, setBillingLoading] = useState<'upgrade' | 'portal' | null>(null)
+  const [billingLoading, setBillingLoading] = useState<'pro' | 'enterprise' | 'portal' | null>(null)
   const [billingError, setBillingError] = useState<string | null>(null)
 
   const isPro = user?.isPro === true
@@ -22,11 +22,11 @@ export default function DashboardSettings() {
     }
   }, [searchParams, refreshUser])
 
-  async function handleUpgrade() {
+  async function handleUpgrade(plan: 'pro' | 'enterprise') {
     setBillingError(null)
-    setBillingLoading('upgrade')
+    setBillingLoading(plan)
     try {
-      const { url } = await api.auth.createCheckoutSession('pro')
+      const { url } = await api.auth.createCheckoutSession(plan)
       if (url) window.location.href = url
     } catch (err) {
       setBillingError(err instanceof Error ? err.message : 'Failed to start checkout')
@@ -80,19 +80,29 @@ export default function DashboardSettings() {
           <p className="dashboardSettingsHint">
             {isPro
               ? 'Billing is managed with Stripe. Use the portal to update payment or cancel your subscription.'
-              : 'Upgrade to Pro for more daily rewrites. Billing is managed with Stripe.'}
+              : 'Choose a plan for more daily rewrites. Billing is managed with Stripe.'}
           </p>
           {billingError && <p className="dashboardSettingsError">{billingError}</p>}
           <div className="dashboardSettingsActions">
             {!isPro && (
-              <button
-                type="button"
-                className="dashboardBtn dashboardBtnPrimary"
-                onClick={handleUpgrade}
-                disabled={!user || billingLoading !== null}
-              >
-                {billingLoading === 'upgrade' ? 'Opening…' : 'Upgrade plan'}
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="dashboardBtn dashboardBtnPrimary"
+                  onClick={() => handleUpgrade('pro')}
+                  disabled={!user || billingLoading !== null}
+                >
+                  {billingLoading === 'pro' ? 'Opening…' : 'Upgrade to Pro'}
+                </button>
+                <button
+                  type="button"
+                  className="dashboardBtn dashboardBtnSecondary"
+                  onClick={() => handleUpgrade('enterprise')}
+                  disabled={!user || billingLoading !== null}
+                >
+                  {billingLoading === 'enterprise' ? 'Opening…' : 'Upgrade to Enterprise'}
+                </button>
+              </>
             )}
             {isPro && (
               <button

@@ -95,7 +95,7 @@ export default function Register() {
           <button type="submit" className="authSubmit">Create account</button>
         </form>
         <p className="authFooter">
-          Already have an account? <Link to="/login" state={{ fromLandingTry }}>Sign in</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

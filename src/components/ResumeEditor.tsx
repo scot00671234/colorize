@@ -8,6 +8,10 @@ export type ResumeEditorHandle = {
   getSelectedText: () => string
   replaceSelection: (text: string) => void
   getText: () => string
+  /** Insert HTML or plain text at the start of the document (e.g. for generated summary). */
+  insertContentAtStart: (htmlOrText: string) => void
+  /** Plain text with ## for H2 and ### for H3, for PDF export. */
+  getExportText: () => string
 }
 
 type ResumeEditorProps = {
@@ -69,6 +73,35 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
         editor?.chain().focus().insertContent(text).run()
       },
       getText: () => editor?.getText() ?? '',
+      insertContentAtStart: (htmlOrText: string) => {
+        if (!editor) return
+        const content = htmlOrText.trim().startsWith('<') ? htmlOrText : `<p>${htmlOrText.replace(/\n/g, '</p><p>')}</p>`
+        editor.chain().focus().insertContentAt(0, content).run()
+      },
+      getExportText: () => {
+        if (!editor?.state.doc) return editor?.getText() ?? ''
+        const parts: string[] = []
+        editor.state.doc.forEach((node) => {
+          if (node.type.name === 'heading') {
+            const level = node.attrs.level as number
+            const prefix = level === 1 ? '#' : level === 2 ? '##' : '###'
+            const text = node.textContent.trim()
+            if (text) parts.push(`${prefix} ${text}`)
+          } else if (node.type.name === 'paragraph' || node.type.name === 'blockquote') {
+            const text = node.textContent.trim()
+            if (text) parts.push(text)
+          } else if (node.type.name === 'bulletList' || node.type.name === 'orderedList') {
+            node.forEach((item) => {
+              const text = item.textContent.trim()
+              if (text) parts.push(`• ${text}`)
+            })
+          } else {
+            const text = node.textContent.trim()
+            if (text) parts.push(text)
+          }
+        })
+        return parts.join('\n\n')
+      },
     }),
     [editor]
   )
@@ -87,6 +120,23 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
   return (
     <div className={`resumeEditor ${className ?? ''}`}>
       <div className="resumeEditorToolbar">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={editor.isActive('heading', { level: 2 }) ? 'resumeEditorBtnActive' : ''}
+          title="Section heading"
+        >
+          H2
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={editor.isActive('heading', { level: 3 }) ? 'resumeEditorBtnActive' : ''}
+          title="Subheading"
+        >
+          H3
+        </button>
+        <span className="resumeEditorToolbarDivider" aria-hidden />
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}

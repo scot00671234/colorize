@@ -46,7 +46,11 @@ router.post('/export-pdf', async (req: Request, res: Response): Promise<void> =>
           if (doc.y + LINE_HEIGHT > doc.page.height - MARGIN) {
             doc.addPage()
           }
-          if (/^#\s/.test(trimmed)) {
+          if (/^###\s/.test(trimmed)) {
+            doc.fontSize(12).font('Helvetica-Bold').text(trimmed.replace(/^###\s*/, ''), { continued: false })
+          } else if (/^##\s/.test(trimmed)) {
+            doc.fontSize(14).font('Helvetica-Bold').text(trimmed.replace(/^##\s*/, ''), { continued: false })
+          } else if (/^#\s/.test(trimmed)) {
             doc.fontSize(14).font('Helvetica-Bold').text(trimmed.replace(/^#\s*/, ''), { continued: false })
           } else {
             doc.fontSize(11).font('Helvetica').text(trimmed, { continued: false })

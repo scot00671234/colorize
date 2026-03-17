@@ -347,7 +347,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
         [user.userId]
       ),
       pool.query(
-        `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type = 'rewrite' AND timestamp > now() - interval '24 hours'`,
+        `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type IN ('rewrite', 'summary') AND timestamp > now() - interval '24 hours'`,
         [user.userId]
       ),
     ])

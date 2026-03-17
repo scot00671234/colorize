@@ -141,7 +141,7 @@
   overflow: hidden;
 }
 
-/* Hero backdrop: gradient by default. Set --hero-bg-image: url('/your-hero.jpg') on .hero to use a photo; overlay below keeps text readable. */
+/* Hero backdrop: gradient by default. To use a photo, add public/hero.jpg and set data-hero-bg="true" on the hero <main>. */
 .heroBackdrop {
   position: absolute;
   inset: 0;
@@ -150,6 +150,14 @@
   background-image: var(--hero-bg-image, linear-gradient(165deg, var(--bg-gradient-from) 0%, var(--bg-gradient-to) 45%, rgba(230, 238, 245, 0.97) 100%));
   background-size: cover;
   background-position: center;
+}
+
+.hero[data-hero-bg="true"] .heroBackdrop {
+  background-image: var(--hero-bg-image, url('/hero.jpg')), linear-gradient(165deg, var(--bg-gradient-from) 0%, var(--bg-gradient-to) 45%, rgba(230, 238, 245, 0.97) 100%);
+}
+
+[data-theme="dark"] .hero[data-hero-bg="true"] .heroBackdrop::after {
+  background: linear-gradient(180deg, rgba(15, 19, 25, 0.75) 0%, rgba(20, 24, 32, 0.5) 50%, rgba(26, 35, 50, 0.9) 100%);
 }
 
 .heroBackdrop::after {
@@ -401,52 +409,85 @@
 
 .pathSteps {
   position: relative;
-  max-width: 28rem;
+  max-width: 56rem;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  padding-left: 2.5rem;
+  padding: 0 1rem;
 }
 
 .pathLine {
   position: absolute;
-  left: calc(2.5rem - 6px - 1px);
+  left: 50%;
   top: 1.5rem;
   bottom: 1.5rem;
   width: 2px;
+  margin-left: -1px;
   background: linear-gradient(to bottom, transparent, var(--accent) 5%, var(--accent) 95%, transparent);
-  opacity: 0.35;
+  opacity: 0.4;
   border-radius: 1px;
 }
 
 .pathStep {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0;
+  position: relative;
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.45s ease;
+  transition: opacity 0.55s ease, transform 0.5s ease;
 }
 
-.pathStep.pathStepVisible {
+.pathStep.pathStepLeft {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding-right: 50%;
+  padding-left: 0;
+  transform: translateX(-24px);
+}
+
+.pathStep.pathStepRight {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  padding-left: 50%;
+  padding-right: 0;
+  transform: translateX(24px);
+}
+
+.pathStep.pathStepVisible.pathStepLeft {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
+}
+
+.pathStep.pathStepVisible.pathStepRight {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.pathStep .pathNode {
+  position: absolute;
+  left: 50%;
+  margin-left: -6px;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+.pathStep .pathCard {
+  flex: 1;
+  min-width: 0;
+  max-width: 26rem;
 }
 
 .pathNode {
-  flex-shrink: 0;
   width: 12px;
   height: 12px;
-  margin-top: 0.5rem;
   border-radius: 50%;
   background: var(--accent);
-  border: 2px solid var(--bg);
+  border: 2px solid var(--bg-base);
   box-shadow: 0 0 0 1px var(--glass-border);
 }
 
 .pathCard {
-  flex: 1;
   padding: 1.25rem 1.5rem;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
@@ -469,6 +510,39 @@
   color: var(--text-secondary);
   line-height: 1.55;
   margin: 0;
+}
+
+@media (max-width: 768px) {
+  .pathSteps {
+    max-width: 28rem;
+    margin: 0 auto;
+    padding-left: 2.5rem;
+    padding-right: 0;
+  }
+  .pathLine {
+    left: calc(2.5rem - 6px - 1px);
+    margin-left: 0;
+  }
+  .pathStep.pathStepLeft,
+  .pathStep.pathStepRight {
+    flex-direction: row;
+    padding-left: 0;
+    padding-right: 0;
+    transform: translateY(12px);
+  }
+  .pathStep.pathStepVisible.pathStepLeft,
+  .pathStep.pathStepVisible.pathStepRight {
+    transform: translateY(0);
+  }
+  .pathStep .pathNode {
+    position: static;
+    margin-left: 0;
+    flex-shrink: 0;
+    margin-right: 1rem;
+  }
+  .pathStep .pathCard {
+    max-width: none;
+  }
 }
 
 .landingTrySection {
@@ -501,9 +575,9 @@
 }
 
 .landingTryCard {
-  max-width: 32rem;
+  max-width: 42rem;
   margin: 0 auto;
-  padding: 1.75rem;
+  padding: 2rem;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -512,7 +586,7 @@
   box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 1rem;
 }
 
 .landingTryLabel {
@@ -524,16 +598,16 @@
 
 .landingTryInput {
   width: 100%;
-  min-height: 5.5rem;
-  padding: 0.875rem 1rem;
+  min-height: 10rem;
+  padding: 1rem 1.25rem;
   font-size: 0.9375rem;
   font-family: inherit;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--text-primary);
-  background: var(--bg);
+  background: var(--input-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  resize: none;
+  resize: vertical;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -568,25 +642,28 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 0.875rem 1.5rem;
-  margin-top: 0.25rem;
-  font-size: 1rem;
+  padding: 1rem 1.75rem;
+  margin-top: 0.5rem;
+  font-size: 1.0625rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--btn-primary-text);
   background: var(--accent);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
+  box-shadow: 0 4px 14px -2px rgba(90, 122, 138, 0.35);
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .landingTryCta:hover {
   background: var(--accent-strong);
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px -4px rgba(90, 122, 138, 0.4);
+  transform: translateY(-1px);
 }
 
 .landingTryCta:active {
-  transform: scale(0.99);
+  transform: translateY(0) scale(0.99);
 }
 
 .landingTryCta:focus-visible {
@@ -1627,13 +1704,39 @@
   margin-bottom: 0;
 }
 
+.resumeRewriteOptionsDetails {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+
+.resumeRewriteOptionsSummary {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  list-style: none;
+}
+
+.resumeRewriteOptionsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.resumeRewriteOptionsSummary::before {
+  content: '▸ ';
+  display: inline-block;
+  width: 1em;
+}
+
+.resumeRewriteOptionsDetails[open] .resumeRewriteOptionsSummary::before {
+  content: '▾ ';
+}
+
 .resumeRewriteOptions {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 1.5rem;
-  margin-bottom: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--glass-border);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border);
 }
 
 .resumeRewriteOption {
@@ -1823,6 +1926,13 @@
   border-color: var(--accent);
 }
 
+.resumeEditorToolbarDivider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--glass-border);
+  margin: 0 0.15rem;
+}
+
 .resumeEditor .ProseMirror {
   min-height: 280px;
   padding: 1rem 1rem 1.25rem;
@@ -1844,6 +1954,24 @@
 .resumeEditor .ProseMirror ol {
   padding-left: 1.5rem;
   margin-bottom: 0.5rem;
+}
+
+.resumeEditor .ProseMirror h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  color: var(--text-primary);
+}
+
+.resumeEditor .ProseMirror h2:first-child {
+  margin-top: 0;
+}
+
+.resumeEditor .ProseMirror h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.35rem;
+  color: var(--text-primary);
 }
 
 /* Resume preview side-by-side */
@@ -1892,4 +2020,133 @@
   background: rgba(250, 204, 21, 0.35);
   padding: 0 2px;
   border-radius: 2px;
+}
+
+/* —— Resume analysis feedback —— */
+.resumeAnalysisFeedback {
+  padding: 0;
+}
+
+.resumeAnalysisScoreRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.resumeAnalysisScoreLabel {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.resumeAnalysisScoreValue {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.resumeAnalysisScoreMax {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 0.15rem;
+}
+
+.resumeAnalysisBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.resumeAnalysisBreakdownItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0.2rem 0.75rem;
+  align-items: center;
+}
+
+.resumeAnalysisBreakdownLabel {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.resumeAnalysisBreakdownBarWrap {
+  grid-column: 1 / -1;
+  height: 6px;
+  background: var(--glass-bg-strong);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.resumeAnalysisBreakdownBar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.25s ease;
+}
+
+.resumeAnalysisBreakdownValue {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.resumeAnalysisBlock {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.resumeAnalysisBlock:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.resumeAnalysisBlockTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.resumeAnalysisBlockHint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.resumeAnalysisTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.resumeAnalysisTag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent-soft);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+}
+
+.resumeAnalysisTagMuted {
+  background: var(--glass-bg-strong);
+  color: var(--text-muted);
+}
+
+.resumeAnalysisTips {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.resumeAnalysisTips li {
+  margin-bottom: 0.35rem;
 }

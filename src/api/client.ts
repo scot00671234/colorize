@@ -136,6 +136,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ text, language: options?.language, context: options?.context }),
       }),
+    summary: (resumeText: string, jobDescription?: string) =>
+      request<{ summary: string }>('/api/ai/summary', {
+        method: 'POST',
+        body: JSON.stringify({ resumeText, jobDescription: jobDescription || undefined }),
+      }),
     score: (resumeText: string, jobDescription: string) =>
       request<{ score: number; breakdown?: Record<string, number>; keywords?: string[] }>('/api/ai/score', {
         method: 'POST',

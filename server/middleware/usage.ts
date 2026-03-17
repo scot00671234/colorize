@@ -17,7 +17,7 @@ const REWRITE_BURST_WINDOW_MS = 60 * 1000
 const REWRITE_BURST_MAX = 20
 const DAILY_REWRITE_SUSPEND = 1000
 
-export type ActionType = 'rewrite' | 'score' | 'export'
+export type ActionType = 'rewrite' | 'summary' | 'score' | 'export'
 
 /** Check rewrite limits: daily cap, burst, suspend. Call after requireAuth. */
 export async function checkRewriteLimits(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -43,11 +43,11 @@ export async function checkRewriteLimits(req: Request, res: Response, next: Next
     const [userRow, dailyCount, burstCount] = await Promise.all([
       pool.query('SELECT is_pro, suspended_at FROM users WHERE id = $1', [userId]),
       pool.query(
-        `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type = 'rewrite' AND timestamp > now() - interval '24 hours'`,
+        `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type IN ('rewrite', 'summary') AND timestamp > now() - interval '24 hours'`,
         [userId]
       ),
       pool.query(
-        `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type = 'rewrite' AND timestamp > now() - interval '60 seconds'`,
+        `SELECT COUNT(*)::int AS c FROM usage_logs WHERE user_id = $1 AND action_type IN ('rewrite', 'summary') AND timestamp > now() - interval '60 seconds'`,
         [userId]
       ),
     ])

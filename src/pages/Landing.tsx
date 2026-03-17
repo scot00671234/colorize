@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { setPendingRewrite } from '../utils/landingPendingRewrite'
 
 const PATH_STEPS = [
-  { id: 1, title: 'One document opens the door', body: 'Your resume is the key recruiters use to decide: in or out. Not luck. Not timing. The words on the page.' },
-  { id: 2, title: 'Get past the gate', body: 'Most applications never reach a human. They are filtered out before anyone sees them. The right wording gets you into the room.' },
-  { id: 3, title: 'Speak their language', body: 'Sharp bullets. Strong verbs. The language hiring managers actually notice. Sound like the candidate they want to hire.' },
-  { id: 4, title: 'The job. The life.', body: 'The right resume is not just nice to have. It opens doors. It can change your entire life. The job you want starts here.' },
+  { id: 1, title: 'One document opens the door', body: 'Recruiters decide in or out from one thing: your resume. Not luck, not timing. The words on the page.' },
+  { id: 2, title: 'Get past the gate', body: 'Most applications never reach a human. The right wording gets you past the screeners and into the room.' },
+  { id: 3, title: 'Speak their language', body: 'Sharp bullets and strong verbs. The language hiring managers notice. Sound like the candidate they want to hire.' },
+  { id: 4, title: 'The job. The life.', body: 'The right resume opens doors. It can change your whole trajectory. The job you want starts here.' },
 ] as const
 
 function BlobTop() {
@@ -132,9 +132,9 @@ export default function Landing() {
           <span className="heroBadge">One page. Your future.</span>
           <h1 className="heroTitle">The right resume changes everything.</h1>
           <p className="heroSubtitle">
-            It is the key to the job and the life you want. We help you write the one that opens the door.
+            The key to the job and the life you want. We help you write the resume that opens the door.
           </p>
-          <Link to="/register" className="heroCta">Make my resume the one that opens doors</Link>
+          <Link to="/register" className="heroCta">Make my resume open doors</Link>
         </div>
       </main>
 
@@ -145,7 +145,7 @@ export default function Landing() {
           {PATH_STEPS.map((step, i) => (
             <div
               key={step.id}
-              className={`pathStep ${visible.has(i) ? 'pathStepVisible' : ''}`}
+              className={`pathStep pathStep${i % 2 === 0 ? 'Left' : 'Right'} ${visible.has(i) ? 'pathStepVisible' : ''}`}
               ref={(el) => { refs.current[i] = el }}
             >
               <div className="pathNode" aria-hidden />
@@ -161,7 +161,7 @@ export default function Landing() {
       <section className="section landingTrySection" id="try">
         <div className="landingTryHeader">
           <h2 className="landingTryTitle">Paste a bullet. See what we can do.</h2>
-          <p className="landingTrySubtitle">We will rewrite it once you are in. Sign up free to get your result.</p>
+          <p className="landingTrySubtitle">We’ll rewrite it once you’re in. Sign up free and get your result in seconds.</p>
         </div>
         <form onSubmit={handleTrySubmit} className="landingTryCard">
           <label className="landingTryLabel" htmlFor="landing-try-text">
@@ -174,13 +174,13 @@ export default function Landing() {
             value={tryText}
             onChange={(e) => setTryText(e.target.value)}
             maxLength={LANDING_TRY_MAX_LENGTH + 100}
-            rows={3}
+            rows={6}
             aria-describedby={tryError ? 'landing-try-error' : 'landing-try-hint'}
           />
           <p id="landing-try-hint" className="landingTryHint">{tryText.length} / {LANDING_TRY_MAX_LENGTH} characters</p>
           {tryError && <p id="landing-try-error" className="landingTryError" role="alert">{tryError}</p>}
           <button type="submit" className="landingTryCta">
-            Get my AI rewrite. Sign up free
+            Get my AI rewrite — sign up free
           </button>
           <p className="landingTryLogin">
             Already have an account? <Link to="/login" state={{ fromLandingTry: true }} className="landingTryLoginLink">Sign in</Link>
@@ -191,14 +191,14 @@ export default function Landing() {
       <section className="section" id="about">
         <div className="sectionHeader">
           <p className="sectionLabel">Why bioqz</p>
-          <h2 className="sectionTitle">You are not bad at job hunting. Your resume just is not speaking the right language.</h2>
+          <h2 className="sectionTitle">You’re not bad at job hunting. Your resume just isn’t speaking the right language.</h2>
         </div>
         <div className="aboutContent">
           <p className="aboutText">
-            Paste your resume. Paste the job description. We sharpen your bullets, score you against the role, and show you exactly which keywords to hit. Side by side view so you see the difference. One click for a clean, ATS-friendly PDF. No design skills. No guesswork.
+            Paste your resume and the job description. We sharpen your bullets, score you against the role, and show you exactly which keywords to hit. See the difference side by side. One click for a clean, ATS-friendly PDF. No design skills. No guesswork.
           </p>
           <p className="aboutText">
-            Fair limits so everyone gets a smooth experience. 50 rewrites a day on the house, more when you need them. No lock-in. Cancel anytime.
+            50 rewrites a day free. More when you need them. No lock-in. Cancel anytime.
           </p>
         </div>
       </section>
@@ -244,7 +244,7 @@ export default function Landing() {
       <section className="section ctaSection">
         <div className="ctaBox">
           <h2>Your next job is out there. Your resume should be ready.</h2>
-          <p>Join for free. 50 AI rewrites today. No credit card required.</p>
+          <p>Join free. 50 AI rewrites today. No credit card.</p>
           <Link to="/register" className="heroCta">Get started free</Link>
         </div>
       </section>

@@ -37,3 +37,12 @@ export async function runMigrations() {
     await client.end()
   }
 }
+
+// When run directly: node scripts/run-migrations.js
+const isMain = process.argv[1]?.endsWith('run-migrations.js')
+if (isMain) {
+  runMigrations().then(() => process.exit(0)).catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}

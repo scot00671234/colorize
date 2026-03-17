@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "server": "tsx server/index.ts",
     "dev:server": "tsx watch server/index.ts",
-    "start": "tsx server/index.ts",
+    "start": "node scripts/run-migrations.js && tsx server/index.ts",
     "migrate": "node scripts/run-migrations.js",
     "local:up": "node scripts/start-local.js"
   },

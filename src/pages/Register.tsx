@@ -64,7 +64,7 @@ export default function Register() {
       <div className="authCard">
         <h1 className="authTitle">Create account</h1>
         <p className="authSubtitle">
-          Get started with a free account. Colorize your old photos—no credit card required.
+          Create your account and start colorizing old photos with Wish Wello.
         </p>
         {error && <div className="authError" role="alert">{error}</div>}
         <form onSubmit={handleSubmit} className="authForm">

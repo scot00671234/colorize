@@ -8,7 +8,7 @@ export default function Privacy() {
         <p className="contentSubtitle">Last updated: {new Date().toLocaleDateString('en-US')}</p>
         <div className="contentBody">
           <p>
-            This privacy policy describes how we collect, use, and protect your information when you use Colorize (our photo colorization and restoration service).
+            This privacy policy describes how we collect, use, and protect your information when you use Wish Wello (our photo colorization and restoration service).
           </p>
           <h2>Information we collect</h2>
           <p>

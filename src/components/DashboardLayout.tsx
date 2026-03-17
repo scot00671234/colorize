@@ -80,7 +80,7 @@ export default function DashboardLayout() {
         <div className={`dashboardSidebarContent ${sidebarOpen ? '' : 'dashboardSidebarContent--hidden'}`}>
         <Link to={basePath} className="dashboardBrand">
           <img src="/logo.svg" alt="" className="dashboardLogo" width="24" height="24" />
-          <span className="dashboardBrandText">Colorize</span>
+          <span className="dashboardBrandText">Wish Wello</span>
         </Link>
 
         <nav className="dashboardNav">

@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import BeforeAfterSlider from '../components/BeforeAfterSlider'
 
-const PRODUCT_NAME = 'Colorize'
+const PRODUCT_NAME = 'Wish Wello'
 
 export default function Landing() {
   const { user } = useAuth()
@@ -19,15 +20,17 @@ export default function Landing() {
           <span className="heroBadge">AI photo colorize & restore</span>
           <h1 className="heroTitle">Bring old photos back to life.</h1>
           <p className="heroSubtitle">
-            Upload black & white or damaged photos. Our AI colorizes and restores them in seconds. No design skills—just your memories, in color.
+            Upload black & white or damaged photos. {PRODUCT_NAME} colorizes and restores them in seconds. No design skills—just your memories, in color.
           </p>
           {user ? (
             <Link to="/dashboard/colorize" className="heroCta">Colorize a photo</Link>
           ) : (
-            <Link to="/register" className="heroCta">Get started free</Link>
+            <Link to="/register" className="heroCta">Get started</Link>
           )}
         </div>
       </main>
+
+      <BeforeAfterSlider />
 
       <section className="section" id="about">
         <div className="sectionHeader">
@@ -39,7 +42,7 @@ export default function Landing() {
             {PRODUCT_NAME} uses deep learning to add natural color to black & white photos and to restore damaged or faded images. Upload a photo, and our AI returns a colorized or restored version you can download. Your photos stay private and are processed securely.
           </p>
           <p className="aboutText">
-            Free accounts can try colorization; upgrade to Pro or Team for more photos per month and optional restoration features.
+            Choose a plan that fits your usage—from personal archives to teams. All plans include colorization and restoration; higher tiers include more photos per month.
           </p>
         </div>
       </section>
@@ -56,7 +59,7 @@ export default function Landing() {
           </article>
           <article className="featureCard">
             <h3>Photo restoration</h3>
-            <p>Reduce noise, fix damage, and improve clarity. Optional face restoration for portraits (Pro and above).</p>
+            <p>Reduce noise, fix damage, and improve clarity. Face restoration for portraits on Pro and Team plans.</p>
           </article>
           <article className="featureCard">
             <h3>Secure dashboard</h3>
@@ -72,38 +75,40 @@ export default function Landing() {
         </div>
         <div className="pricingGrid">
           <article className="pricingCard">
-            <p className="pricingName">Free</p>
-            <p className="pricingPrice">$0<span>/month</span></p>
-            <p className="pricingDesc">Try colorization with a limited number of photos. No credit card required.</p>
+            <p className="pricingName">Starter</p>
+            <p className="pricingPrice">$19<span>/month</span></p>
+            <p className="pricingDesc">For occasional use. Colorize and restore a set number of photos each month.</p>
             <ul className="pricingList">
-              <li>Limited colorizations per month</li>
+              <li>50 photos per month</li>
+              <li>Colorize + restore</li>
               <li>Dashboard access</li>
-              <li>Download results</li>
+              <li>Download all results</li>
             </ul>
             <Link to="/register" className="pricingCta">Get started</Link>
           </article>
           <article className="pricingCard pricingCardFeatured">
             <p className="pricingName">Pro</p>
-            <p className="pricingPrice">Subscription<span>/month</span></p>
-            <p className="pricingDesc">More colorizations and optional restoration. For regular use and family archives.</p>
+            <p className="pricingPrice">$29<span>/month</span></p>
+            <p className="pricingDesc">For regular use and family archives. More photos and priority processing.</p>
             <ul className="pricingList">
-              <li>More photos per month</li>
+              <li>150 photos per month</li>
               <li>Colorize + restore</li>
               <li>Priority processing</li>
               <li>Manage via Stripe</li>
             </ul>
-            <Link to="/register" className="pricingCta">Upgrade to Pro</Link>
+            <Link to="/register" className="pricingCta">Get Pro</Link>
           </article>
           <article className="pricingCard">
-            <p className="pricingName">Team / Enterprise</p>
-            <p className="pricingPrice">Custom</p>
-            <p className="pricingDesc">Higher volume for studios or teams. Contact us for pricing.</p>
+            <p className="pricingName">Team</p>
+            <p className="pricingPrice">$59<span>/month</span></p>
+            <p className="pricingDesc">For studios and teams. Highest quota and all features.</p>
             <ul className="pricingList">
-              <li>Higher photo limits</li>
+              <li>400 photos per month</li>
               <li>All Pro features</li>
               <li>Billing portal</li>
+              <li>Cancel anytime</li>
             </ul>
-            <Link to="/contact" className="pricingCta">Contact us</Link>
+            <Link to="/register" className="pricingCta">Get Team</Link>
           </article>
         </div>
       </section>
@@ -111,11 +116,11 @@ export default function Landing() {
       <section className="section ctaSection">
         <div className="ctaBox">
           <h2>Ready to colorize your memories?</h2>
-          <p>Create a free account and upload your first photo. No credit card required.</p>
+          <p>Create an account and choose a plan. Start with Starter at $19/month.</p>
           {user ? (
             <Link to="/dashboard/colorize" className="heroCta">Go to Colorize</Link>
           ) : (
-            <Link to="/register" className="heroCta">Get started free</Link>
+            <Link to="/register" className="heroCta">Get started</Link>
           )}
         </div>
       </section>
@@ -127,6 +132,7 @@ export default function Landing() {
             <a href="/#about">About</a>
             <a href="/#features">Features</a>
             <a href="/#pricing">Pricing</a>
+            <a href="/#demo">Demo</a>
             <Link to="/contact">Contact</Link>
             <Link to="/privacy">Privacy</Link>
             <Link to="/terms">Terms</Link>

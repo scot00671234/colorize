@@ -23,12 +23,20 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
   const { plan } = (req.body as { plan?: string }) || {}
   const priceId = plan === 'enterprise' ? config.stripe.priceEnterprise : config.stripe.pricePro
   if (!priceId) {
-    res.status(400).json({ error: 'Invalid plan or Stripe price not configured. Set STRIPE_PRICE_PRO or STRIPE_PRICE_ENTERPRISE.' })
+    res.status(400).json({
+      error: 'Stripe price not configured. Set STRIPE_PRICE_PRO in .env (see .env.example). Create a Product and Price in Stripe Dashboard → Products, then copy the Price ID.',
+    })
     return
   }
 
   try {
     const baseUrl = config.app.baseUrl
+    if (!baseUrl || baseUrl.includes('localhost')) {
+      res.status(400).json({
+        error: 'Set APP_BASE_URL to your public URL so Stripe can redirect back after checkout. For local testing use Stripe CLI: stripe listen --forward-to localhost:3001/api/auth/stripe-webhook',
+      })
+      return
+    }
     const session = await stripe!.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -40,7 +48,8 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
     res.json({ url: session.url })
   } catch (err) {
     console.error('Create checkout session error:', err)
-    res.status(500).json({ error: 'Failed to create checkout session' })
+    const message = err instanceof Error ? err.message : 'Failed to create checkout session'
+    res.status(500).json({ error: `Checkout failed: ${message}` })
   }
 })
 
@@ -106,6 +115,8 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
     res.status(400).json({ error: 'Invalid signature' })
     return
   }
+  const priceEnterprise = config.stripe.priceEnterprise || ''
+
   if (event.type === 'checkout.session.completed' && event.data.object) {
     const session = event.data.object as Stripe.Checkout.Session
     const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id
@@ -113,7 +124,7 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
     if (customerId && email && pool) {
       try {
         await pool.query(
-          'UPDATE users SET stripe_customer_id = $1, is_pro = true, updated_at = now() WHERE email = $2',
+          'UPDATE users SET stripe_customer_id = $1, is_pro = true, is_team = false, updated_at = now() WHERE email = $2',
           [customerId, email.toLowerCase()]
         )
       } catch (err) {
@@ -121,33 +132,39 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
       }
     }
   }
+  function subscriptionTier(sub: Stripe.Subscription): { isPro: boolean; isTeam: boolean } {
+    const priceId = sub.items?.data?.[0]?.price?.id ?? ''
+    const isTeam = !!priceEnterprise && priceId === priceEnterprise
+    const isPro = sub.status === 'active'
+    return { isPro, isTeam: isPro && isTeam }
+  }
   if (event.type === 'customer.subscription.created' && event.data.object) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-    const isActive = sub.status === 'active'
+    const { isPro, isTeam } = subscriptionTier(sub)
     if (customerId && pool) {
       try {
         await pool.query(
-          'UPDATE users SET is_pro = $1, updated_at = now() WHERE stripe_customer_id = $2',
-          [isActive, customerId]
+          'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
+          [isPro, isTeam, customerId]
         )
       } catch (err) {
-        console.error('Webhook subscription.created is_pro failed:', err)
+        console.error('Webhook subscription.created is_pro/is_team failed:', err)
       }
     }
   }
   if (event.type === 'customer.subscription.updated' && event.data.object) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-    const isActive = sub.status === 'active'
+    const { isPro, isTeam } = subscriptionTier(sub)
     if (customerId && pool) {
       try {
         await pool.query(
-          'UPDATE users SET is_pro = $1, updated_at = now() WHERE stripe_customer_id = $2',
-          [isActive, customerId]
+          'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
+          [isPro, isTeam, customerId]
         )
       } catch (err) {
-        console.error('Webhook subscription.updated is_pro failed:', err)
+        console.error('Webhook subscription.updated is_pro/is_team failed:', err)
       }
     }
   }
@@ -157,7 +174,7 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
     if (customerId && pool) {
       try {
         await pool.query(
-          'UPDATE users SET is_pro = false, updated_at = now() WHERE stripe_customer_id = $1',
+          'UPDATE users SET is_pro = false, is_team = false, updated_at = now() WHERE stripe_customer_id = $1',
           [customerId]
         )
       } catch (err) {

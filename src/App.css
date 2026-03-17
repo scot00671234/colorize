@@ -154,10 +154,24 @@
 
 .hero[data-hero-bg="true"] .heroBackdrop {
   background-image: var(--hero-bg-image, url('https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1920&q=80')), linear-gradient(165deg, var(--bg-gradient-from) 0%, var(--bg-gradient-to) 45%, rgba(230, 238, 245, 0.97) 100%);
+  background-blend-mode: overlay;
+}
+
+/* Stronger overlay so the photo is subtle and the hero looks professional, not cheap */
+.hero[data-hero-bg="true"] .heroBackdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(165deg,
+    rgba(248, 250, 252, 0.92) 0%,
+    rgba(241, 245, 249, 0.88) 35%,
+    rgba(226, 232, 240, 0.85) 70%,
+    rgba(248, 250, 252, 0.9) 100%);
+  pointer-events: none;
 }
 
 [data-theme="dark"] .hero[data-hero-bg="true"] .heroBackdrop::after {
-  background: linear-gradient(180deg, rgba(15, 19, 25, 0.75) 0%, rgba(20, 24, 32, 0.5) 50%, rgba(26, 35, 50, 0.9) 100%);
+  background: linear-gradient(165deg, rgba(15, 19, 25, 0.88) 0%, rgba(20, 24, 32, 0.82) 50%, rgba(26, 35, 50, 0.92) 100%);
 }
 
 .heroBackdrop::after {
@@ -1547,6 +1561,30 @@
   box-shadow: var(--shadow-glass);
 }
 
+.dashboardProjectList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+}
+
+.dashboardProjectList li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.dashboardProjectMeta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.dashboardProjectLimit {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
 .dashboardCardText {
   font-size: 0.9375rem;
   color: var(--text-secondary);
@@ -1733,6 +1771,83 @@
   font-size: 0.8125rem;
   color: var(--text-muted);
   margin-bottom: 0;
+}
+
+.resumeProjectBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.resumeProjectTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.resumeProjectActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resumeProjectSelect {
+  font-size: 0.875rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  min-width: 10rem;
+}
+
+.resumeEditorWrapWithPopover {
+  position: relative;
+}
+
+.resumeRewritePopover {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-glass);
+  z-index: 10;
+}
+
+.resumeRewritePopoverLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.resumeRewritePopoverLabelText {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.resumeRewritePopoverInput {
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.resumeRewritePopoverActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .resumeLandingBanner {
@@ -2122,6 +2237,11 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0.75rem 0 0.35rem;
+  color: var(--text-primary);
+}
+
+.resumeEditor .ProseMirror strong {
+  font-weight: 700;
   color: var(--text-primary);
 }
 

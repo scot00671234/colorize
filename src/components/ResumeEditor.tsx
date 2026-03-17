@@ -19,10 +19,12 @@ type ResumeEditorProps = {
   onChange: (html: string, text: string) => void
   placeholder?: string
   className?: string
+  /** Called when selection changes (e.g. to show a rewrite prompt popup). */
+  onSelectionChange?: (hasSelection: boolean) => void
 }
 
 const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function ResumeEditor(
-  { content, onChange, className },
+  { content, onChange, className, onSelectionChange },
   ref
 ) {
   const editor = useEditor({
@@ -60,6 +62,20 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
       editor.off('update', h)
     }
   }, [editor, onChange])
+
+  useEffect(() => {
+    if (!editor || !onSelectionChange) return
+    const onSelect = () => {
+      const { from, to } = editor.state.selection
+      onSelectionChange(from !== to)
+    }
+    editor.on('selectionUpdate', onSelect)
+    editor.on('transaction', onSelect)
+    return () => {
+      editor.off('selectionUpdate', onSelect)
+      editor.off('transaction', onSelect)
+    }
+  }, [editor, onSelectionChange])
 
   useImperativeHandle(
     ref,
@@ -111,7 +127,17 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
     const trimmed = content.trim()
     if (!trimmed) return
     const isHtml = trimmed.startsWith('<')
-    const toSet = isHtml ? trimmed : trimmed.split(/\n/).map((p) => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('')
+    let toSet: string
+    if (isHtml) {
+      toSet = trimmed
+    } else {
+      // Plain text: escape HTML and convert **text** to <strong>text</strong> so bold renders visually
+      toSet = trimmed.split(/\n/).map((line) => {
+        const escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const withBold = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        return `<p>${withBold}</p>`
+      }).join('')
+    }
     const current = isHtml ? editor.getHTML() : editor.getText()
     if (trimmed !== current.trim()) {
       editor.commands.setContent(toSet, false)
@@ -179,6 +205,23 @@ const ResumeEditor = forwardRef<ResumeEditorHandle, ResumeEditorProps>(function 
           title="Numbered list"
         >
           1.
+        </button>
+        <span className="resumeEditorToolbarDivider" aria-hidden />
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          title="Undo"
+        >
+          Undo
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          title="Redo"
+        >
+          Redo
         </button>
       </div>
       <EditorContent editor={editor} />

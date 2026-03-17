@@ -34,6 +34,8 @@ export async function runMigrations() {
     await runFile('server/migrations/002_resume_builder.sql')
     console.log('Running server/migrations/003_password_reset.sql...')
     await runFile('server/migrations/003_password_reset.sql')
+    console.log('Running server/migrations/004_projects.sql...')
+    await runFile('server/migrations/004_projects.sql')
     console.log('Migrations done.')
   } finally {
     await client.end()

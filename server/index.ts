@@ -9,6 +9,7 @@ import authRoutes from './routes/auth'
 import billingRoutes from './routes/billing'
 import aiRoutes from './routes/ai'
 import resumeRoutes from './routes/resume'
+import projectsRoutes from './routes/projects'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const isProduction = config.nodeEnv === 'production'
@@ -37,6 +38,7 @@ app.use('/api/auth', authRateLimiter, authRoutes)
 app.use('/api/auth', billingRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/resume', resumeRoutes)
+app.use('/api/projects', projectsRoutes)
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true })

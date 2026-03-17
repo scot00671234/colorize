@@ -343,7 +343,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
   try {
     const [userResult, usageResult] = await Promise.all([
       pool.query(
-        'SELECT id, email, email_verified_at, created_at, is_pro FROM users WHERE id = $1',
+        'SELECT id, email, email_verified_at, created_at, is_pro, COALESCE(is_team, false) AS is_team FROM users WHERE id = $1',
         [user.userId]
       ),
       pool.query(
@@ -358,6 +358,8 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
     }
     const rewriteCountToday = usageResult.rows[0]?.c ?? 0
     const rewriteLimit = row.is_pro === true ? 500 : 2
+    const isTeam = row.is_team === true
+    const projectLimit = isTeam ? 100 : (row.is_pro === true ? 10 : 1)
     res.json({
       user: {
         id: row.id,
@@ -365,13 +367,15 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
         emailVerified: !!row.email_verified_at,
         createdAt: row.created_at,
         isPro: !!row.is_pro,
+        isTeam: !!isTeam,
         rewriteCountToday,
         rewriteLimit,
+        projectLimit,
       },
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : ''
-    if (msg.includes('is_pro') || msg.includes('usage_logs') || msg.includes('column') || msg.includes('relation')) {
+    if (msg.includes('is_pro') || msg.includes('is_team') || msg.includes('usage_logs') || msg.includes('column') || msg.includes('relation')) {
       try {
         const fallback = await pool.query(
           'SELECT id, email, email_verified_at, created_at FROM users WHERE id = $1',
@@ -389,8 +393,10 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
             emailVerified: !!row.email_verified_at,
             createdAt: row.created_at,
             isPro: false,
+            isTeam: false,
             rewriteCountToday: 0,
             rewriteLimit: 2,
+            projectLimit: 1,
           },
         })
         return

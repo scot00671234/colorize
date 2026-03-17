@@ -57,6 +57,7 @@ async function request<T>(
     const message = typeof data?.error === 'string' ? data.error : res.statusText || 'Request failed'
     throw new Error(message)
   }
+  if (res.status === 204) return Promise.resolve(undefined as T)
   return res.json() as Promise<T>
 }
 
@@ -117,7 +118,7 @@ export const api = {
       }),
 
     me: () =>
-      request<{ user: { id: string; email: string; emailVerified: boolean; createdAt: string; isPro?: boolean; rewriteCountToday?: number; rewriteLimit?: number } }>('/api/auth/me'),
+      request<{ user: { id: string; email: string; emailVerified: boolean; createdAt: string; isPro?: boolean; isTeam?: boolean; rewriteCountToday?: number; rewriteLimit?: number; projectLimit?: number } }>('/api/auth/me'),
 
     deleteAccount: () =>
       request<{ message: string }>('/api/auth/account', { method: 'DELETE' }),
@@ -161,5 +162,24 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ content }),
       }),
+  },
+
+  projects: {
+    list: () =>
+      request<{ projects: { id: string; title: string; content: string; created_at: string; updated_at: string }[] }>('/api/projects'),
+    get: (id: string) =>
+      request<{ id: string; title: string; content: string; created_at: string; updated_at: string }>(`/api/projects/${id}`),
+    create: (title: string) =>
+      request<{ id: string; title: string; content: string; created_at: string; updated_at: string }>('/api/projects', {
+        method: 'POST',
+        body: JSON.stringify({ title }),
+      }),
+    update: (id: string, data: { title?: string; content?: string }) =>
+      request<{ id: string; title: string; content: string; created_at: string; updated_at: string }>(`/api/projects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/api/projects/${id}`, { method: 'DELETE' }),
   },
 }

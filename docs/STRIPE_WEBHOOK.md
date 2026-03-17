@@ -1,5 +1,7 @@
 # Stripe webhook setup
 
+**The API already has the webhook endpoint.** It lives at `POST /api/auth/stripe-webhook` (see `server/routes/billing.ts`). Raw body is preserved for signature verification. You only need to **add the webhook in the Stripe Dashboard** and set `STRIPE_WEBHOOK_SECRET` in your env.
+
 Quick reference for configuring the Stripe webhook (test or live).
 
 ## 1. Destination type

@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import ResumeEditor, { type ResumeEditorHandle } from '../components/ResumeEditor'
-import ResumePreview from '../components/ResumePreview'
 import ResumeAnalysisFeedback from '../components/ResumeAnalysisFeedback'
 import { api } from '../api/client'
 import { extractResumeText, RESUME_UPLOAD_ACCEPT } from '../utils/extractResumeText'
@@ -9,12 +9,6 @@ import { extractResumeText, RESUME_UPLOAD_ACCEPT } from '../utils/extractResumeT
 const UPLOAD_PASTE_HINT = ' Can\'t upload? Copy and paste your text into the editor below.'
 import { getPendingRewrite, clearPendingRewrite } from '../utils/landingPendingRewrite'
 import type { Content } from '@tiptap/react'
-
-const TEMPLATES = [
-  { id: 'one-column', label: 'One column' },
-  { id: 'two-column', label: 'Two column (skills sidebar)' },
-  { id: 'creative', label: 'Creative' },
-] as const
 
 const REWRITE_LANGUAGES = [
   { value: 'same', label: 'Same as input' },
@@ -44,14 +38,12 @@ type EditorMode = 'resume' | 'job_application'
 export default function DashboardResume() {
   const { user, refreshUser } = useAuth()
   const [editorMode, setEditorMode] = useState<EditorMode>('resume')
-  const [originalContent, setOriginalContent] = useState('')
   const [editorContent, setEditorContent] = useState<Content>('')
   const [editorText, setEditorText] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [scoreBreakdown, setScoreBreakdown] = useState<Record<string, number> | null>(null)
   const [keywords, setKeywords] = useState<string[]>([])
-  const [template, setTemplate] = useState<string>(TEMPLATES[0].id)
   const [rewriteLoading, setRewriteLoading] = useState(false)
   const [rewriteError, setRewriteError] = useState<string | null>(null)
   const [scoreLoading, setScoreLoading] = useState(false)
@@ -67,13 +59,98 @@ export default function DashboardResume() {
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
+  const [currentProjectTitle, setCurrentProjectTitle] = useState<string>('')
+  const [projects, setProjects] = useState<{ id: string; title: string }[]>([])
+  const [projectLoading, setProjectLoading] = useState(false)
+  const [saveLoading, setSaveLoading] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [selectionPopupOpen, setSelectionPopupOpen] = useState(false)
+  const [selectionPrompt, setSelectionPrompt] = useState('')
   const editorRef = useRef<ResumeEditorHandle>(null)
   const exportMenuRef = useRef<HTMLDivElement>(null)
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const projectIdFromUrl = searchParams.get('projectId')
 
   const handleEditorChange = useCallback((html: string, text: string) => {
     setEditorContent(html)
     setEditorText(text)
   }, [])
+
+  // Load projects list
+  useEffect(() => {
+    api.projects.list()
+      .then((res) => setProjects(res.projects.map((p) => ({ id: p.id, title: p.title || 'Untitled' }))))
+      .catch(() => {})
+  }, [])
+
+  // Load project when URL has projectId
+  useEffect(() => {
+    if (!projectIdFromUrl) {
+      setCurrentProjectId(null)
+      setCurrentProjectTitle('')
+      setSaveError(null)
+      return
+    }
+    setProjectLoading(true)
+    setSaveError(null)
+    api.projects.get(projectIdFromUrl)
+      .then((proj) => {
+        setCurrentProjectId(proj.id)
+        setCurrentProjectTitle(proj.title || 'Untitled')
+        setEditorContent(proj.content || '')
+        setEditorText(proj.content ? (() => {
+          const div = document.createElement('div')
+          div.innerHTML = proj.content
+          return div.textContent || ''
+        })() : '')
+        setProjects((prev) => prev.some((p) => p.id === proj.id) ? prev : [...prev, { id: proj.id, title: proj.title || 'Untitled' }])
+      })
+      .catch(() => setSaveError('Failed to load project'))
+      .finally(() => setProjectLoading(false))
+  }, [projectIdFromUrl])
+
+  const handleSave = useCallback(async () => {
+    setSaveError(null)
+    setSaveLoading(true)
+    const content = typeof editorContent === 'string' ? editorContent : ''
+    try {
+      if (currentProjectId) {
+        await api.projects.update(currentProjectId, { content, title: currentProjectTitle || undefined })
+      } else {
+        const created = await api.projects.create(currentProjectTitle.trim() || 'Untitled')
+        setCurrentProjectId(created.id)
+        setCurrentProjectTitle(created.title || 'Untitled')
+        setProjects((prev) => [...prev, { id: created.id, title: created.title || 'Untitled' }])
+        navigate(`/dashboard/resume?projectId=${created.id}`, { replace: true })
+        await api.projects.update(created.id, { content })
+      }
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save')
+    } finally {
+      setSaveLoading(false)
+    }
+  }, [currentProjectId, currentProjectTitle, editorContent, navigate])
+
+  const handleSaveAs = useCallback(async () => {
+    const title = window.prompt('Project title', currentProjectTitle || 'Untitled')?.trim() || 'Untitled'
+    setSaveError(null)
+    setSaveLoading(true)
+    const content = typeof editorContent === 'string' ? editorContent : ''
+    try {
+      const created = await api.projects.create(title)
+      await api.projects.update(created.id, { content })
+      setCurrentProjectId(created.id)
+      setCurrentProjectTitle(created.title || 'Untitled')
+      setProjects((prev) => [...prev, { id: created.id, title: created.title || 'Untitled' }])
+      navigate(`/dashboard/resume?projectId=${created.id}`, { replace: true })
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save as new project')
+    } finally {
+      setSaveLoading(false)
+    }
+  }, [currentProjectTitle, editorContent, navigate])
 
   const handleRewrite = useCallback(async () => {
     const text = editorRef.current?.getSelectedText()?.trim()
@@ -100,6 +177,35 @@ export default function DashboardResume() {
       setRewriteLoading(false)
     }
   }, [refreshUser, rewriteLanguage, rewriteTone, rewriteContext, editorMode])
+
+  const handleRewriteWithPrompt = useCallback(async () => {
+    setRewriteError(null)
+    setRewriteLoading(true)
+    const text = editorRef.current?.getSelectedText()?.trim()
+    if (!text) {
+      setRewriteError('Select some text in the editor first.')
+      setRewriteLoading(false)
+      return
+    }
+    try {
+      const res = await api.ai.rewrite(text, {
+        language: rewriteLanguage,
+        tone: rewriteTone,
+        context: selectionPrompt.trim() || rewriteContext.trim() || undefined,
+        mode: editorMode,
+      })
+      if (res.rewritten) {
+        editorRef.current?.replaceSelection(res.rewritten)
+      }
+      setSelectionPopupOpen(false)
+      setSelectionPrompt('')
+      await refreshUser()
+    } catch (err) {
+      setRewriteError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setRewriteLoading(false)
+    }
+  }, [refreshUser, rewriteLanguage, rewriteTone, rewriteContext, editorMode, selectionPrompt])
 
 
   const handleScore = useCallback(async () => {
@@ -210,7 +316,6 @@ export default function DashboardResume() {
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     const text = e.clipboardData.getData('text/plain')
     if (!text?.trim()) return
-    setOriginalContent((prev) => (prev ? prev : text))
     setEditorContent((prev) => {
       if (typeof prev === 'string' && prev.trim().length > 0) return prev
       return text
@@ -233,7 +338,6 @@ export default function DashboardResume() {
         setEditorError('No text could be extracted from this file (it may be a scanned image).' + UPLOAD_PASTE_HINT)
         return
       }
-      setOriginalContent((prev) => (prev ? prev : text))
       setEditorContent((prev) => {
         if (typeof prev === 'string' && prev.trim().length > 0) return prev
         return text
@@ -270,14 +374,12 @@ export default function DashboardResume() {
       .rewrite(text)
       .then((res) => {
         if (res.rewritten) {
-          setOriginalContent(text)
           setEditorContent(res.rewritten)
           setEditorText(res.rewritten)
         }
       })
       .catch((err) => {
         setRewriteError(err instanceof Error ? err.message : 'Could not run your rewrite.')
-        setOriginalContent(text)
         setEditorContent(text)
         setEditorText(text)
       })
@@ -288,7 +390,7 @@ export default function DashboardResume() {
   }, [refreshUser])
 
   const used = user?.rewriteCountToday ?? 0
-  const limit = user?.rewriteLimit ?? 50
+  const limit = user?.rewriteLimit ?? 2
 
   return (
     <div className="dashboardPage dashboardResume">
@@ -323,6 +425,35 @@ export default function DashboardResume() {
           Rewrites today: {used} / {limit}
           {user?.isPro && ' (Pro)'}
         </div>
+        <div className="resumeProjectBar">
+          <span className="resumeProjectTitle" aria-label="Current project">
+            {projectLoading ? 'Loading…' : (currentProjectTitle || 'Untitled')}
+          </span>
+          <div className="resumeProjectActions">
+            <select
+              className="resumeProjectSelect"
+              value={currentProjectId ?? ''}
+              onChange={(e) => {
+                const id = e.target.value
+                if (id) navigate(`/dashboard/resume?projectId=${id}`)
+                else navigate('/dashboard/resume')
+              }}
+              aria-label="Switch project"
+            >
+              <option value="">New (no project)</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.title}</option>
+              ))}
+            </select>
+            <button type="button" className="dashboardBtn dashboardBtnSecondary" onClick={handleSave} disabled={saveLoading}>
+              {saveLoading ? 'Saving…' : currentProjectId ? 'Save' : 'Save project'}
+            </button>
+            <button type="button" className="dashboardBtn dashboardBtnSecondary" onClick={handleSaveAs} disabled={saveLoading || (user?.projectLimit != null && projects.length >= user.projectLimit)}>
+              Save as new
+            </button>
+          </div>
+        </div>
+        {saveError && <p className="dashboardSettingsError">{saveError}</p>}
         {landingRewriteLoading && (
           <p className="resumeLandingBanner" role="status">
             Generating your rewrite from the landing page…
@@ -472,12 +603,36 @@ export default function DashboardResume() {
               {summaryError && <p className="dashboardSettingsError">{summaryError}</p>}
             </div>
           )}
-          <div onPaste={handlePaste} className="resumeEditorWrap">
+          <div onPaste={handlePaste} className="resumeEditorWrap resumeEditorWrapWithPopover">
             <ResumeEditor
               ref={editorRef}
               content={editorContent}
               onChange={handleEditorChange}
+              onSelectionChange={(hasSelection) => setSelectionPopupOpen(hasSelection)}
             />
+            {selectionPopupOpen && (
+              <div className="resumeRewritePopover" role="dialog" aria-label="Rewrite selection with custom instruction">
+                <label className="resumeRewritePopoverLabel">
+                  <span className="resumeRewritePopoverLabelText">Instruction (e.g. make this more academic)</span>
+                  <input
+                    type="text"
+                    className="resumeRewritePopoverInput"
+                    placeholder="e.g. make this more academic, more concise, focus on leadership"
+                    value={selectionPrompt}
+                    onChange={(e) => setSelectionPrompt(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRewriteWithPrompt()}
+                  />
+                </label>
+                <div className="resumeRewritePopoverActions">
+                  <button type="button" className="dashboardBtn dashboardBtnPrimary" onClick={handleRewriteWithPrompt} disabled={rewriteLoading}>
+                    {rewriteLoading ? 'Rewriting…' : 'Rewrite selection'}
+                  </button>
+                  <button type="button" className="dashboardBtn dashboardBtnSecondary" onClick={() => { setSelectionPopupOpen(false); setSelectionPrompt(''); }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
             <p className="resumeEditorWordCount" aria-live="polite">
               {editorText.trim() ? `${editorText.trim().split(/\s+/).filter(Boolean).length} words` : '0 words'}
             </p>
@@ -496,27 +651,6 @@ export default function DashboardResume() {
           </section>
         )}
 
-        <section className="resumeSection resumeCard">
-          <h2 className="resumeStepTitle">Preview</h2>
-          <p className="resumeStepHint">How your resume looks. Keywords from the job description are highlighted when you run Analyze.</p>
-          <div className="resumeTemplates">
-            {TEMPLATES.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`dashboardBtn dashboardBtnSecondary ${template === t.id ? 'dashboardNavLinkActive' : ''}`}
-                onClick={() => setTemplate(t.id)}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <ResumePreview
-            originalContent={originalContent}
-            currentContent={editorText}
-            keywords={keywords.length > 0 ? keywords : undefined}
-          />
-        </section>
       </div>
     </div>
   )

@@ -4,13 +4,11 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { pool } from '../db'
 import { config } from '../config'
-import { stubEmailService } from '../services/email'
-import { buildVerificationEmail } from '../services/email'
+import { emailService, buildVerificationEmail } from '../services/email'
 import { requireAuth } from '../middleware/auth'
 import type { JwtPayload } from '../middleware/auth'
 
 const router = Router()
-const emailService = stubEmailService
 
 /** POST /api/auth/register */
 router.post('/register', async (req: Request, res: Response): Promise<void> => {

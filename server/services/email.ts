@@ -1,7 +1,5 @@
-/**
- * Email service interface. Replace the implementation below with your provider:
- * - SendGrid, Resend, AWS SES, Nodemailer (SMTP), etc.
- */
+import { Resend } from 'resend'
+import { config } from '../config'
 
 export type SendEmailOptions = {
   to: string
@@ -14,19 +12,38 @@ export type EmailService = {
   send(options: SendEmailOptions): Promise<void>
 }
 
-/**
- * Stub: logs to console. Replace with real implementation and wire in server/index.ts.
- */
-export const stubEmailService: EmailService = {
+/** Stub: logs to console. Used when RESEND_API_KEY is not set. */
+const stubEmailService: EmailService = {
   async send({ to, subject, html, text }) {
     if (process.env.NODE_ENV !== 'test') {
       console.log('[Email]', { to, subject, text: text || html.slice(0, 80) + '...' })
-      // So you can copy the link when testing without real email
-      const match = typeof text === 'string' && text.match(/(https?:\/\/\S+?)\.?\s/);
+      const match = typeof text === 'string' && text.match(/(https?:\/\/\S+?)\.?\s/)
       if (match) console.log('[Email] Verification link (copy this):', match[1])
     }
   },
 }
+
+/** Resend: sends via Resend API when RESEND_API_KEY is set. */
+function createResendService(): EmailService {
+  const resend = new Resend(config.resend.apiKey)
+  return {
+    async send({ to, subject, html, text }) {
+      const { error } = await resend.emails.send({
+        from: config.resend.from,
+        to: [to],
+        subject,
+        html,
+        text: text ?? undefined,
+      })
+      if (error) throw new Error(error.message)
+    },
+  }
+}
+
+/** Use Resend if API key is set, otherwise stub (log only). */
+export const emailService: EmailService = config.resend.apiKey
+  ? createResendService()
+  : stubEmailService
 
 /** Build verification email HTML (can be replaced with a template engine). */
 export function buildVerificationEmail(options: {

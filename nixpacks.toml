@@ -1,8 +1,6 @@
-# Nixpacks config for VPS / Railway / Render etc.
+# Nixpacks config for VPS / Railway / Render / Dokploy etc.
 # Single process: serves API + built frontend (set NODE_ENV=production).
-
-[phases.setup]
-nixPkgs = ["nodejs-20_x"]
+# Do not override nixPkgs with nodejs-20_x — the Nixpkgs revision Nixpacks uses may not have that attribute; use NIXPACKS_NODE_VERSION instead.
 
 [phases.install]
 cmds = ["npm install"]
@@ -15,3 +13,4 @@ cmd = "npm start"
 
 [variables]
 NODE_ENV = "production"
+NIXPACKS_NODE_VERSION = "20"

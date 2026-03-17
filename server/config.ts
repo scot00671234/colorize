@@ -39,6 +39,11 @@ export const config = {
   redis: {
     url: process.env.REDIS_URL,
   },
+
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
+    from: process.env.RESEND_FROM || 'Resend <onboarding@resend.dev>',
+  },
 } as const
 
 if (!config.database.connectionString) {

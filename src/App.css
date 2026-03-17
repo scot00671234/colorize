@@ -877,8 +877,24 @@
   z-index: 2;
 }
 
+.dashboard .dashboardSidebarToggle {
+  position: fixed;
+  top: 1rem;
+  z-index: 100;
+  transition: left 0.2s ease;
+}
+
+.dashboard:not(.dashboardSidebar--collapsed-adjacent) .dashboardSidebarToggle {
+  left: calc(260px + 1rem);
+}
+
+.dashboard.dashboardSidebar--collapsed-adjacent .dashboardSidebarToggle {
+  left: 1rem;
+}
+
 .dashboardSidebar {
   width: 260px;
+  min-width: 260px;
   flex-shrink: 0;
   padding: 1.5rem 1rem;
   background: var(--glass-bg);
@@ -888,6 +904,76 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease;
+  overflow: hidden;
+}
+
+.dashboardSidebar--collapsed {
+  width: 0;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-right-width: 0;
+}
+
+.dashboardSidebarToggle {
+  position: absolute;
+  z-index: 30;
+  top: 1rem;
+  left: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, left 0.2s ease;
+}
+
+.dashboardSidebarToggle:hover {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.dashboardSidebarToggle {
+  position: fixed;
+  top: 1rem;
+  z-index: 100;
+  transition: left 0.2s ease;
+  box-shadow: var(--shadow-glass);
+}
+
+.dashboard .dashboardSidebarToggle {
+  left: 1rem;
+}
+
+.dashboard:not(.dashboard--sidebarCollapsed) .dashboardSidebarToggle {
+  left: calc(260px - 2.5rem - 0.5rem);
+}
+
+.dashboardBrandText {
+  white-space: nowrap;
+}
+
+
+.dashboardSidebarTheme {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dashboardSidebarTheme .themeToggle {
+  flex-shrink: 0;
+}
+
+.dashboardSidebarThemeLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .dashboardBrand {
@@ -1163,17 +1249,75 @@
 
 /* —— Resume Builder —— */
 .dashboardResume {
-  max-width: 900px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.resumePageHeader {
+  margin-bottom: 2rem;
+}
+
+.resumePageHeader .dashboardPageSubtitle {
+  margin-bottom: 0.75rem;
 }
 
 .resumeUsage {
   font-size: 0.8125rem;
   color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+.resumeFlow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.resumeCard {
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-glass);
+}
+
+.resumeStepTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.resumeStepHint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
 }
 
 .resumeSection {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
+}
+
+.resumeToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.resumeErrors {
+  margin-bottom: 0.75rem;
+}
+
+.resumeEditorWrap {
+  margin-top: 0.5rem;
+}
+
+.resumeScoreCard .resumeScore {
+  margin-top: 0.25rem;
 }
 
 .resumeSectionHead {
@@ -1250,6 +1394,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 /* Resume editor (Tiptap) */

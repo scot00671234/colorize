@@ -135,33 +135,35 @@ export default function DashboardResume() {
 
   return (
     <div className="dashboardPage dashboardResume">
-      <h1 className="dashboardPageTitle">Resume AI</h1>
-      <p className="dashboardPageSubtitle">
-        Upload or paste your resume, paste the job description, and get AI rewrites and an ATS score.
-      </p>
+      <header className="resumePageHeader">
+        <h1 className="dashboardPageTitle">Resume AI</h1>
+        <p className="dashboardPageSubtitle">
+          Paste the job description, add your resume, then use the tools below to rewrite, score, and export.
+        </p>
+        <div className="resumeUsage">
+          Rewrites today: {used} / {limit}
+          {user?.isPro && ' (Pro)'}
+        </div>
+      </header>
 
-      <div className="resumeUsage">
-        Rewrites today: {used} / {limit}
-        {user?.isPro && ' (Pro)'}
-      </div>
-
-      <section className="resumeSection">
-        <label className="authLabel">
-          Job description
+      <div className="resumeFlow">
+        <section className="resumeSection resumeCard">
+          <h2 className="resumeStepTitle">1. Job description</h2>
+          <p className="resumeStepHint">Paste the role description so we can score and tailor your resume.</p>
           <textarea
             className="resumeJobDesc"
             placeholder="Paste the job description here..."
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             rows={4}
+            aria-label="Job description"
           />
-        </label>
-      </section>
+        </section>
 
-      <section className="resumeSection">
-        <div className="resumeSectionHead">
-          <h2 className="dashboardSettingsHeading">Resume content</h2>
-          <div className="resumeActions">
+        <section className="resumeSection resumeCard">
+          <h2 className="resumeStepTitle">2. Resume content</h2>
+          <p className="resumeStepHint">Upload a .txt file or paste your resume into the editor. Select text to rewrite with AI.</p>
+          <div className="resumeToolbar">
             <input
               type="file"
               accept=".txt"
@@ -197,62 +199,61 @@ export default function DashboardResume() {
               {exportLoading ? 'Exporting…' : 'Export PDF'}
             </button>
           </div>
-        </div>
-        {rewriteError && <p className="dashboardSettingsError">{rewriteError}</p>}
-        {scoreError && <p className="dashboardSettingsError">{scoreError}</p>}
-        {exportError && <p className="dashboardSettingsError">{exportError}</p>}
-        {editorError && <p className="dashboardSettingsError">{editorError}</p>}
-
-        <div onPaste={handlePaste}>
-          <ResumeEditor
-            ref={editorRef}
-            content={editorContent}
-            onChange={handleEditorChange}
-          />
-        </div>
-      </section>
-
-      {score !== null && (
-        <section className="resumeSection">
-          <h2 className="dashboardSettingsHeading">ATS Score</h2>
-          <div className="resumeScore">
-            <span className="resumeScoreValue">{score}</span>
-            <span className="resumeScoreMax">/ 100</span>
-            {scoreBreakdown && (
-              <div className="resumeScoreBreakdown">
-                {Object.entries(scoreBreakdown).map(([k, v]) => (
-                  <span key={k}>{k}: {v}</span>
-                ))}
-              </div>
-            )}
+          {(rewriteError || scoreError || exportError || editorError) && (
+            <div className="resumeErrors">
+              {rewriteError && <p className="dashboardSettingsError">{rewriteError}</p>}
+              {scoreError && <p className="dashboardSettingsError">{scoreError}</p>}
+              {exportError && <p className="dashboardSettingsError">{exportError}</p>}
+              {editorError && <p className="dashboardSettingsError">{editorError}</p>}
+            </div>
+          )}
+          <div onPaste={handlePaste} className="resumeEditorWrap">
+            <ResumeEditor
+              ref={editorRef}
+              content={editorContent}
+              onChange={handleEditorChange}
+            />
           </div>
         </section>
-      )}
 
-      <section className="resumeSection">
-        <h2 className="dashboardSettingsHeading">Templates</h2>
-        <div className="resumeTemplates">
-          {TEMPLATES.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`dashboardBtn dashboardBtnSecondary ${template === t.id ? 'dashboardNavLinkActive' : ''}`}
-              onClick={() => setTemplate(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </section>
+        {score !== null && (
+          <section className="resumeSection resumeCard resumeScoreCard">
+            <h2 className="resumeStepTitle">ATS Score</h2>
+            <div className="resumeScore">
+              <span className="resumeScoreValue">{score}</span>
+              <span className="resumeScoreMax">/ 100</span>
+              {scoreBreakdown && (
+                <div className="resumeScoreBreakdown">
+                  {Object.entries(scoreBreakdown).map(([k, v]) => (
+                    <span key={k}>{k}: {v}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
-      <section className="resumeSection">
-        <h2 className="dashboardSettingsHeading">Preview</h2>
-        <ResumePreview
-          originalContent={originalContent}
-          currentContent={editorText}
-          keywords={keywords.length > 0 ? keywords : undefined}
-        />
-      </section>
+        <section className="resumeSection resumeCard">
+          <h2 className="resumeStepTitle">3. Template & preview</h2>
+          <div className="resumeTemplates">
+            {TEMPLATES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`dashboardBtn dashboardBtnSecondary ${template === t.id ? 'dashboardNavLinkActive' : ''}`}
+                onClick={() => setTemplate(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <ResumePreview
+            originalContent={originalContent}
+            currentContent={editorText}
+            keywords={keywords.length > 0 ? keywords : undefined}
+          />
+        </section>
+      </div>
     </div>
   )
 }

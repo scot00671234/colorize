@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 
-/** Demo image: same image shown as B&W (left) vs color (right); slider reveals the difference. */
-const DEMO_IMAGE = 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80'
+/** Demo image: 1940s FSA/OWI color photo (Library of Congress, public domain). Shown as B&W (left) vs color (right). */
+const DEMO_IMAGE = 'https://tile.loc.gov/storage-services/service/pnp/fsac/1a35000/1a35400/1a35475r.jpg'
 
 export default function BeforeAfterSlider() {
   const [position, setPosition] = useState(50)

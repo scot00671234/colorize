@@ -28,8 +28,20 @@ const REWRITE_LANGUAGES = [
   { value: 'zh', label: 'Chinese' },
 ] as const
 
+const REWRITE_TONES = [
+  { value: 'professional', label: 'Professional' },
+  { value: 'business-casual', label: 'Business casual' },
+  { value: 'academic', label: 'Academic' },
+  { value: 'technical', label: 'Technical' },
+  { value: 'concise', label: 'Concise' },
+  { value: 'achievement-focused', label: 'Achievement-focused' },
+] as const
+
+type EditorMode = 'resume' | 'job_application'
+
 export default function DashboardResume() {
   const { user, refreshUser } = useAuth()
+  const [editorMode, setEditorMode] = useState<EditorMode>('resume')
   const [originalContent, setOriginalContent] = useState('')
   const [editorContent, setEditorContent] = useState<Content>('')
   const [editorText, setEditorText] = useState('')
@@ -45,6 +57,7 @@ export default function DashboardResume() {
   const [exportLoading, setExportLoading] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
   const [rewriteLanguage, setRewriteLanguage] = useState('same')
+  const [rewriteTone, setRewriteTone] = useState('professional')
   const [rewriteContext, setRewriteContext] = useState('')
   const [editorError, setEditorError] = useState<string | null>(null)
   const [uploadLoading, setUploadLoading] = useState(false)
@@ -69,7 +82,9 @@ export default function DashboardResume() {
     try {
       const res = await api.ai.rewrite(text, {
         language: rewriteLanguage,
+        tone: rewriteTone,
         context: rewriteContext.trim() || undefined,
+        mode: editorMode,
       })
       if (res.rewritten) {
         editorRef.current?.replaceSelection(res.rewritten)
@@ -80,12 +95,12 @@ export default function DashboardResume() {
     } finally {
       setRewriteLoading(false)
     }
-  }, [refreshUser, rewriteLanguage, rewriteContext])
+  }, [refreshUser, rewriteLanguage, rewriteTone, rewriteContext, editorMode])
 
 
   const handleScore = useCallback(async () => {
     if (!editorText.trim() || !jobDescription.trim()) {
-      setScoreError('Add resume content and a job description.')
+      setScoreError('Add content and a job description.')
       return
     }
     setScoreError(null)
@@ -106,7 +121,7 @@ export default function DashboardResume() {
     setExportError(null)
     const contentToExport = editorRef.current?.getExportText?.() ?? editorText
     if (!contentToExport?.trim()) {
-      setExportError('Add resume content before exporting.')
+      setExportError('Add content before exporting.')
       return
     }
     setExportLoading(true)
@@ -115,7 +130,7 @@ export default function DashboardResume() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'resume.pdf'
+      a.download = editorMode === 'job_application' ? 'application.pdf' : 'resume.pdf'
       a.click()
       URL.revokeObjectURL(url)
       await refreshUser()
@@ -124,7 +139,7 @@ export default function DashboardResume() {
     } finally {
       setExportLoading(false)
     }
-  }, [editorText, refreshUser])
+  }, [editorText, editorMode, refreshUser])
 
   const handleGenerateSummary = useCallback(async () => {
     if (!editorText?.trim() || editorText.trim().length < 50) {
@@ -134,7 +149,10 @@ export default function DashboardResume() {
     setSummaryError(null)
     setSummaryLoading(true)
     try {
-      const { summary } = await api.ai.summary(editorText, jobDescription.trim() || undefined)
+      const { summary } = await api.ai.summary(editorText, {
+        jobDescription: jobDescription.trim() || undefined,
+        mode: editorMode,
+      })
       if (summary?.trim()) {
         editorRef.current?.insertContentAtStart(summary.trim())
       }
@@ -144,7 +162,7 @@ export default function DashboardResume() {
     } finally {
       setSummaryLoading(false)
     }
-  }, [editorText, jobDescription, refreshUser])
+  }, [editorText, jobDescription, editorMode, refreshUser])
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     const text = e.clipboardData.getData('text/plain')
@@ -222,9 +240,31 @@ export default function DashboardResume() {
   return (
     <div className="dashboardPage dashboardResume">
       <header className="resumePageHeader">
-        <h1 className="dashboardPageTitle">Resume</h1>
+        <div className="resumePageHeaderTop">
+          <h1 className="dashboardPageTitle">Editor</h1>
+          <div className="editorModeSwitch" role="group" aria-label="Editing mode">
+            <button
+              type="button"
+              className={`editorModeBtn ${editorMode === 'resume' ? 'editorModeBtnActive' : ''}`}
+              onClick={() => setEditorMode('resume')}
+              aria-pressed={editorMode === 'resume'}
+            >
+              Resume
+            </button>
+            <button
+              type="button"
+              className={`editorModeBtn ${editorMode === 'job_application' ? 'editorModeBtnActive' : ''}`}
+              onClick={() => setEditorMode('job_application')}
+              aria-pressed={editorMode === 'job_application'}
+            >
+              Job application
+            </button>
+          </div>
+        </div>
         <p className="dashboardPageSubtitle">
-          Edit your resume, analyze it against a job description, then export to PDF.
+          {editorMode === 'resume'
+            ? 'Edit your resume, analyze it against a job description, then export to PDF.'
+            : 'Edit your cover letter or application answers. Paste the job description to score and tailor your text.'}
         </p>
         <div className="resumeUsage">
           Rewrites today: {used} / {limit}
@@ -252,8 +292,12 @@ export default function DashboardResume() {
         </section>
 
         <section className="resumeSection resumeCard">
-          <h2 className="resumeStepTitle">Your resume</h2>
-          <p className="resumeStepHint">Upload a file or paste your resume. Use the toolbar to format (headings, bold, bullets). Select text and click Rewrite to improve it with AI.</p>
+          <h2 className="resumeStepTitle">{editorMode === 'resume' ? 'Your resume' : 'Your application'}</h2>
+          <p className="resumeStepHint">
+            {editorMode === 'resume'
+              ? 'Upload a file or paste your resume. Use the toolbar to format (headings, bold, bullets). Select text and click Rewrite to improve it with AI.'
+              : 'Paste your cover letter or application answers. Use the toolbar to format. Select text and click Rewrite; the AI will adapt to job application tone.'}
+          </p>
           <div className="resumeToolbar">
             <input
               type="file"
@@ -272,16 +316,16 @@ export default function DashboardResume() {
               onClick={handleScore}
               disabled={scoreLoading || !editorText.trim() || !jobDescription.trim()}
             >
-              {scoreLoading ? 'Analyzing…' : 'Analyze resume'}
+              {scoreLoading ? 'Analyzing…' : editorMode === 'resume' ? 'Analyze resume' : 'Analyze application'}
             </button>
             <button
               type="button"
               className="dashboardBtn dashboardBtnSecondary"
               onClick={handleGenerateSummary}
               disabled={summaryLoading || !editorText.trim() || editorText.trim().length < 50}
-              title="Add a professional summary at the top of your resume"
+              title={editorMode === 'resume' ? 'Add a professional summary at the top' : 'Add a strong opening paragraph for your application'}
             >
-              {summaryLoading ? 'Generating…' : 'Generate summary'}
+              {summaryLoading ? 'Generating…' : editorMode === 'resume' ? 'Generate summary' : 'Generate opening'}
             </button>
             <button
               type="button"
@@ -302,8 +346,21 @@ export default function DashboardResume() {
             </button>
           </div>
           <details className="resumeRewriteOptionsDetails">
-            <summary className="resumeRewriteOptionsSummary">Rewrite options (language & instructions)</summary>
+            <summary className="resumeRewriteOptionsSummary">Rewrite options (style, language & instructions)</summary>
             <div className="resumeRewriteOptions">
+              <label className="resumeRewriteOption">
+                <span className="resumeRewriteOptionLabel">Style / tone</span>
+                <select
+                  className="resumeRewriteSelect"
+                  value={rewriteTone}
+                  onChange={(e) => setRewriteTone(e.target.value)}
+                  aria-label="Tone or style for AI rewrite"
+                >
+                  {REWRITE_TONES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </label>
               <label className="resumeRewriteOption">
                 <span className="resumeRewriteOptionLabel">Language</span>
                 <select

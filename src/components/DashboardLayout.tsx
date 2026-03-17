@@ -5,7 +5,7 @@ import ThemeToggle from './ThemeToggle'
 
 const SEARCH_ITEMS = [
   { label: 'Dashboard', path: '' },
-  { label: 'Resume', path: '/resume' },
+  { label: 'Editor', path: '/resume' },
   { label: 'Settings', path: '/settings' },
 ]
 
@@ -94,7 +94,7 @@ export default function DashboardLayout() {
             to={`${basePath}/resume`}
             className={`dashboardNavLink ${location.pathname === `${basePath}/resume` ? 'dashboardNavLinkActive' : ''}`}
           >
-            Resume
+            Editor
           </Link>
           <Link
             to={`${basePath}/settings`}

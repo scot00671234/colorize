@@ -30,7 +30,6 @@ function Nav() {
           <span>bioqz</span>
         </Link>
         <div className="navLinks">
-          <a href="/#path">Path</a>
           <a href="/#about">About</a>
           <a href="/#features">Features</a>
           <a href="/#pricing">Pricing</a>

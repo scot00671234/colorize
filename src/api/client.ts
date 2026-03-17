@@ -52,6 +52,7 @@ async function request<T>(
   }
 
   if (!res.ok) {
+    if (res.status === 401) clearToken()
     const data = await res.json().catch(() => ({})) as ApiError
     const message = typeof data?.error === 'string' ? data.error : res.statusText || 'Request failed'
     throw new Error(message)
@@ -72,6 +73,7 @@ async function requestBlob(
 
   const res = await fetch(url, { ...init, headers, body })
   if (!res.ok) {
+    if (res.status === 401) clearToken()
     const data = await res.json().catch(() => ({})) as ApiError
     const message = typeof data?.error === 'string' ? data.error : res.statusText || 'Request failed'
     throw new Error(message)
@@ -131,15 +133,15 @@ export const api = {
   },
 
   ai: {
-    rewrite: (text: string, options?: { language?: string; context?: string }) =>
+    rewrite: (text: string, options?: { language?: string; context?: string; tone?: string; mode?: 'resume' | 'job_application' }) =>
       request<{ rewritten: string; tokensUsed?: number }>('/api/ai/rewrite', {
         method: 'POST',
-        body: JSON.stringify({ text, language: options?.language, context: options?.context }),
+        body: JSON.stringify({ text, language: options?.language, context: options?.context, tone: options?.tone, mode: options?.mode }),
       }),
-    summary: (resumeText: string, jobDescription?: string) =>
+    summary: (resumeText: string, options?: { jobDescription?: string; mode?: 'resume' | 'job_application' }) =>
       request<{ summary: string }>('/api/ai/summary', {
         method: 'POST',
-        body: JSON.stringify({ resumeText, jobDescription: jobDescription || undefined }),
+        body: JSON.stringify({ resumeText, jobDescription: options?.jobDescription, mode: options?.mode }),
       }),
     score: (resumeText: string, jobDescription: string) =>
       request<{ score: number; breakdown?: Record<string, number>; keywords?: string[] }>('/api/ai/score', {

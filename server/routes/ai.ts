@@ -16,7 +16,7 @@ router.use(requireAuth)
 /** POST /api/ai/rewrite */
 router.post('/rewrite', checkRewriteLimits, async (req: Request, res: Response): Promise<void> => {
   const { user } = req as Request & { user: JwtPayload }
-  const { text, language, context } = req.body as { text?: string; language?: string; context?: string }
+  const { text, language, context, tone, mode } = req.body as { text?: string; language?: string; context?: string; tone?: string; mode?: string }
   if (!text || typeof text !== 'string') {
     res.status(400).json({ error: 'Missing or invalid text' })
     return
@@ -26,6 +26,8 @@ router.post('/rewrite', checkRewriteLimits, async (req: Request, res: Response):
     return
   }
   const contextStr = typeof context === 'string' ? context.slice(0, 500) : undefined
+  const toneStr = typeof tone === 'string' ? tone.slice(0, 50) : undefined
+  const modeVal = mode === 'job_application' ? 'job_application' : 'resume'
 
   if (!config.deepseek?.apiKey) {
     res.status(503).json({ error: 'AI service is not configured. Please set DEEPSEEK_API_KEY.' })
@@ -33,7 +35,7 @@ router.post('/rewrite', checkRewriteLimits, async (req: Request, res: Response):
   }
 
   try {
-    const result = await rewriteWithDeepSeek(text, { language, context: contextStr })
+    const result = await rewriteWithDeepSeek(text, { language, context: contextStr, tone: toneStr, mode: modeVal })
     const tokensUsed = result.usage.prompt_tokens + result.usage.completion_tokens
     await insertUsageLog(user.userId, 'rewrite', tokensUsed)
     res.json({ rewritten: result.text, tokensUsed })
@@ -46,21 +48,22 @@ router.post('/rewrite', checkRewriteLimits, async (req: Request, res: Response):
 /** POST /api/ai/summary — generate professional summary for top of resume. Uses same daily cap as rewrite. */
 router.post('/summary', checkRewriteLimits, async (req: Request, res: Response): Promise<void> => {
   const { user } = req as Request & { user: JwtPayload }
-  const { resumeText, jobDescription } = req.body as { resumeText?: string; jobDescription?: string }
+  const { resumeText, jobDescription, mode } = req.body as { resumeText?: string; jobDescription?: string; mode?: string }
   if (!resumeText || typeof resumeText !== 'string') {
-    res.status(400).json({ error: 'Resume text is required.' })
+    res.status(400).json({ error: 'Content is required.' })
     return
   }
   const trimmed = resumeText.trim()
   if (trimmed.length < 50) {
-    res.status(400).json({ error: 'Add more resume content before generating a summary.' })
+    res.status(400).json({ error: 'Add more content before generating a summary.' })
     return
   }
   if (trimmed.length > 100_000) {
-    res.status(400).json({ error: 'Resume is too long.' })
+    res.status(400).json({ error: 'Content is too long.' })
     return
   }
   const jobDesc = typeof jobDescription === 'string' ? jobDescription.slice(0, 5000) : undefined
+  const modeVal = mode === 'job_application' ? 'job_application' : 'resume'
 
   if (!config.deepseek?.apiKey) {
     res.status(503).json({ error: 'AI service is not configured. Please set DEEPSEEK_API_KEY.' })
@@ -68,7 +71,7 @@ router.post('/summary', checkRewriteLimits, async (req: Request, res: Response):
   }
 
   try {
-    const result = await generateSummaryWithDeepSeek(trimmed, jobDesc)
+    const result = await generateSummaryWithDeepSeek(trimmed, jobDesc, modeVal)
     const tokensUsed = result.usage.prompt_tokens + result.usage.completion_tokens
     await insertUsageLog(user.userId, 'summary', tokensUsed)
     res.json({ summary: result.text })

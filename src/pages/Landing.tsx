@@ -253,7 +253,6 @@ export default function Landing() {
         <div className="footerInner">
           <Link to="/" className="footerBrand">bioqz</Link>
           <div className="footerLinks">
-            <a href="/#path">Path</a>
             <a href="/#about">About</a>
             <a href="/#features">Features</a>
             <a href="/#pricing">Pricing</a>

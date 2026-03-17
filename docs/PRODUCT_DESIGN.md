@@ -37,7 +37,7 @@ No Next.js, no Prisma. All DB access uses `server/db.ts` and raw SQL (`pool.quer
 2. **Resume entry** — User goes to Dashboard → Resume; uploads PDF or pastes text; content loads into editor.
 3. **Job targeting** — User pastes job description into textarea; used for score and (optionally) AI context.
 4. **Edit & rewrite** — User edits in Tiptap (bold, italic, lists, drag sections). Selects a bullet → “Rewrite with AI” → selection replaced with DeepSeek output; on error, show “Try again.”
-5. **Score** — User clicks “Get score”; sees 0–100 and breakdown (keyword match, verb strength, length, ATS safety). Daily usage shown (e.g. “12/50 rewrites” or “12/500” for Pro).
+5. **Score** — User clicks “Get score”; sees 0–100 and breakdown (keyword match, verb strength, length, ATS safety). Daily usage shown (e.g. “2/2 rewrites (Free)” or “12/500” for Pro).
 6. **Preview** — Side-by-side: Original vs Current; keywords from job description highlighted (e.g. yellow) in Current.
 7. **Export** — “Export PDF” → server generates PDF from editor state (pdfmake) → user downloads.
 8. **Templates** — User switches among one-column, two-column (skills sidebar), creative; layout/styling updates for editor and PDF.
@@ -150,7 +150,7 @@ All AI and export routes: apply rate limit first (1 req/s per user or IP), then 
 ## Abuse protection (critical)
 
 - **usage_logs:** Every rewrite, score, and export inserts a row (`action_type`, `tokens_used` where applicable).
-- **Daily rewrite cap:** Free: 50/day; Pro: 500/day. Count `usage_logs` where `action_type = 'rewrite'` and `timestamp > now() - interval '24 hours'`. If over cap → 429 “Daily rewrite limit reached.”
+- **Daily rewrite cap:** Free: 2/day; Pro: 500/day. Count `usage_logs` where `action_type = 'rewrite'` and `timestamp > now() - interval '24 hours'`. If over cap → 429 “Daily rewrite limit reached.”
 - **Same job desc (>10 in 24h):** Hash job description; track per user. If same hash >10 times in 24h → 30s cooldown (e.g. 429 with `Retry-After: 30`).
 - **Burst (>20 rewrites in 60s):** 429 “Slow down—optimizing for quality” and 5-minute lockout (in-memory or Redis: `lockout:{userId}` TTL 300s). Check before each rewrite.
 - **1000 credits/day:** 1 credit = 1 rewrite. If rewrites in last 24h ≥ 1000 → auto-suspend (e.g. set `users.suspended_at` or in-memory `suspended:{userId}`), 403 “Account paused—contact support,” optional email via existing email service.

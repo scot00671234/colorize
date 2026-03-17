@@ -62,7 +62,7 @@ const FEATURES = [
 ] as const
 
 const PLANS = [
-  { name: 'Free', price: 0, period: 'month', description: 'Everything you need to land your next role. No credit card required.', features: ['50 AI rewrites per day', 'ATS score & keyword highlights', 'Side-by-side original vs current', 'PDF export', '3 layout templates'], cta: 'Get started free', ctaTo: '/register', featured: false },
+  { name: 'Free', price: 0, period: 'month', description: 'Everything you need to land your next role. No credit card required.', features: ['2 AI rewrites per day', 'ATS score & keyword highlights', 'Side-by-side original vs current', 'PDF export', '3 layout templates'], cta: 'Get started free', ctaTo: '/register', featured: false },
   { name: 'Pro', price: 29, period: 'month', description: 'When you are applying to dozens of roles, we have you covered.', features: ['500 AI rewrites per day', 'Everything in Free', 'Priority processing', 'No ads', 'Cancel anytime'], cta: 'Start free trial', ctaTo: '/register', featured: true },
   { name: 'Team', price: 59, period: 'month', description: 'Unlimited ambition. No compromise on rewrites.', features: ['1,500 AI rewrites per day', 'Everything in Pro', 'Highest priority processing', 'Cancel anytime'], cta: 'Start free trial', ctaTo: '/register', featured: false },
 ] as const
@@ -117,7 +117,7 @@ export default function Landing() {
 
   return (
     <>
-      <main className="hero">
+      <main className="hero" data-hero-bg="true">
         <div className="heroBackdrop" aria-hidden />
         <div className="heroBg" aria-hidden>
           <div className="heroOrb heroOrbTop" />
@@ -140,8 +140,9 @@ export default function Landing() {
 
       <section className="section pathSection" id="path" aria-label="Why your resume matters">
         <h2 className="pathSectionTitle">The right resume changes everything</h2>
-        <div className="pathLine" aria-hidden />
-        <div className="pathSteps">
+        <div className="pathSectionInner">
+          <div className="pathLine" aria-hidden />
+          <div className="pathSteps">
           {PATH_STEPS.map((step, i) => (
             <div
               key={step.id}
@@ -155,6 +156,7 @@ export default function Landing() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </section>
 
@@ -180,7 +182,7 @@ export default function Landing() {
           <p id="landing-try-hint" className="landingTryHint">{tryText.length} / {LANDING_TRY_MAX_LENGTH} characters</p>
           {tryError && <p id="landing-try-error" className="landingTryError" role="alert">{tryError}</p>}
           <button type="submit" className="landingTryCta">
-            Get my AI rewrite — sign up free
+            Get my AI rewrite sign up free
           </button>
           <p className="landingTryLogin">
             Already have an account? <Link to="/login" state={{ fromLandingTry: true }} className="landingTryLoginLink">Sign in</Link>
@@ -198,7 +200,7 @@ export default function Landing() {
             Paste your resume and the job description. We sharpen your bullets, score you against the role, and show you exactly which keywords to hit. See the difference side by side. One click for a clean, ATS-friendly PDF. No design skills. No guesswork.
           </p>
           <p className="aboutText">
-            50 rewrites a day free. More when you need them. No lock-in. Cancel anytime.
+            2 rewrites a day free. More when you need them. No lock-in. Cancel anytime.
           </p>
         </div>
       </section>
@@ -244,7 +246,7 @@ export default function Landing() {
       <section className="section ctaSection">
         <div className="ctaBox">
           <h2>Your next job is out there. Your resume should be ready.</h2>
-          <p>Join free. 50 AI rewrites today. No credit card.</p>
+          <p>Join free. 2 AI rewrites today. No credit card.</p>
           <Link to="/register" className="heroCta">Get started free</Link>
         </div>
       </section>

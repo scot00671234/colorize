@@ -11,7 +11,7 @@ import {
   hashJobDesc,
 } from '../services/jobDescCache'
 
-const DAILY_CAP_FREE = 50
+const DAILY_CAP_FREE = 2
 const DAILY_CAP_PRO = 500
 const REWRITE_BURST_WINDOW_MS = 60 * 1000
 const REWRITE_BURST_MAX = 20

@@ -357,7 +357,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
       return
     }
     const rewriteCountToday = usageResult.rows[0]?.c ?? 0
-    const rewriteLimit = row.is_pro === true ? 500 : 50
+    const rewriteLimit = row.is_pro === true ? 500 : 2
     res.json({
       user: {
         id: row.id,
@@ -390,7 +390,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
             createdAt: row.created_at,
             isPro: false,
             rewriteCountToday: 0,
-            rewriteLimit: 50,
+            rewriteLimit: 2,
           },
         })
         return

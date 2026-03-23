@@ -1,7 +1,8 @@
-# Update Sitemap URL if your domain is not colorizer.app (see VITE_SITE_URL in LOCAL_SETUP).
+# Update Sitemap URL if your domain is not colorizer.cc (see VITE_SITE_URL in LOCAL_SETUP).
 User-agent: *
 Allow: /
 
 Disallow: /dashboard
 
-Sitemap: https://colorizer.app/sitemap.xml
+Sitemap: https://colorizer.cc/sitemap.xml
+

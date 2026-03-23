@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
 
 type Props = {
   /** Color reference image (same file used with a grayscale overlay for the “before” side). */
@@ -13,17 +13,9 @@ type Props = {
  */
 export function ColorizeBeforeAfter({ imageSrc, imageDescription }: Props) {
   const [pos, setPos] = useState(48)
-  const id = useId()
-  const labelId = `${id}-label`
 
   return (
-    <div className="colorizeBeforeAfter" role="region" aria-labelledby={labelId}>
-      <p id={labelId} className="colorizeBeforeAfterCaption">
-        <strong>1950s scene — sample</strong>
-        <span className="colorizeBeforeAfterCaptionSub">
-          Drag the slider: monochrome (left) → color (right). Illustrative demo.
-        </span>
-      </p>
+    <div className="colorizeBeforeAfter" role="region" aria-label={imageDescription}>
       <div className="colorizeBeforeAfterFrame">
         <img
           src={imageSrc}

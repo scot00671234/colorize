@@ -61,7 +61,7 @@ If Docker isn’t installed or won’t start, use the manual steps below (you’
 | `REPLICATE_API_TOKEN` | **Image Colorize / Restore** on the workspace (Replicate). Create a token at [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens). | Paste the token; without it, `/api/ai/process` returns 503. Optional: `REPLICATE_COLORIZE_MODEL` / `REPLICATE_RESTORE_MODEL` to override default models. |
 | `APP_BASE_URL` | Base URL of the app; used in emails (e.g. verify link). For local dev this is the Vite URL. | `http://localhost:5173` (already set) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional. For “Continue with Google” on login/register. Create OAuth 2.0 credentials in Google Cloud Console and set the redirect URI to `http://localhost:3001/api/auth/google/callback` (or your API base + `/api/auth/google/callback`). | Leave empty to hide Google sign-in. |
-| `VITE_SITE_URL` | **Production SEO:** canonical URLs, Open Graph, and JSON-LD use this as your public site origin (no trailing slash). | e.g. `https://colorizer.app`. If unset, the browser’s `window.location.origin` is used (fine locally). Also update `public/sitemap.xml` and `public/robots.txt` Sitemap line to match your domain. |
+| `VITE_SITE_URL` | **Production SEO:** canonical URLs, Open Graph, and JSON-LD use this as your public site origin (no trailing slash). | e.g. `https://colorizer.cc`. If unset, the browser’s `window.location.origin` is used (fine locally). Also update `public/sitemap.xml` and `public/robots.txt` Sitemap line to match your domain. |
 
 **Why one file:** The Express server loads `.env` via `dotenv`; Vite loads the same file and exposes `VITE_*` vars to the browser. So one `.env` at the project root is enough for local dev.
 
@@ -128,3 +128,4 @@ If the API isn’t running or `.env` is wrong, login and workspace features will
 | Terminal 1: `npm run server` | Started the Express API. | Serves auth, image API, projects, billing. |
 | Terminal 2: `npm run dev` | Started the Vite dev server. | Serves the React app and hot reload. |
 | Open http://localhost:5173 | Use the app in the browser. | Frontend talks to API at localhost:3001. |
+

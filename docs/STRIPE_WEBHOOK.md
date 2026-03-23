@@ -15,10 +15,10 @@ Use your API base URL + the webhook path:
 
 - **Production:** use your public site origin (no path prefix unless you mount the API elsewhere):
   ```
-  https://yourdomain.com/api/auth/stripe-webhook
+  https://colorizer.cc/api/auth/stripe-webhook
   ```
   Same URL in **Test** and **Live** Stripe modes is fine; each mode has its own signing secret.
-- **Separate API host:** `https://api.yourdomain.com/api/auth/stripe-webhook`
+- **Separate API host:** `https://api.colorizer.cc/api/auth/stripe-webhook`
 - **Local:** use Stripe CLI (`stripe listen --forward-to localhost:3001/api/auth/stripe-webhook`) and use the CLI’s signing secret; don’t add a dashboard endpoint for localhost.
 
 ## 3. Events from

@@ -190,19 +190,9 @@ export const api = {
   },
 
   ai: {
-    processImage: (
-      file: File,
-      options: {
-        mode: 'colorize' | 'restore'
-        withScratch?: boolean
-      }
-    ) => {
+    processImage: (file: File) => {
       const form = new FormData()
       form.append('image', file)
-      form.append('mode', options.mode)
-      if (options.mode === 'restore' && options.withScratch !== undefined) {
-        form.append('withScratch', options.withScratch ? 'true' : 'false')
-      }
       return requestFormData<{ outputUrl: string; mode: string }>('/api/ai/process', form)
     },
   },

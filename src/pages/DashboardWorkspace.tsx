@@ -3,14 +3,12 @@ import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 
 /**
- * Image workspace: upload → colorize (DDColor) or restore (Microsoft BOP) via Replicate.
+ * Image workspace: upload → colorize via Replicate.
  */
 export default function DashboardWorkspace() {
   const inputId = useId()
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [mode, setMode] = useState<'colorize' | 'restore'>('colorize')
-  const [withScratch, setWithScratch] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [outputUrl, setOutputUrl] = useState<string | null>(null)
@@ -43,23 +41,20 @@ export default function DashboardWorkspace() {
     setLoading(true)
     setOutputUrl(null)
     try {
-      const res = await api.ai.processImage(file, {
-        mode,
-        withScratch: mode === 'restore' ? withScratch : undefined,
-      })
+      const res = await api.ai.processImage(file)
       setOutputUrl(res.outputUrl)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       setLoading(false)
     }
-  }, [file, mode, withScratch])
+  }, [file])
 
   return (
     <div className="dashboardPage">
       <h1 className="dashboardPageTitle">Workspace</h1>
       <p className="dashboardPageSubtitle">
-        Upload a photo, then run <strong>Colorize</strong> (B&amp;W → color) or <strong>Restore</strong> (scratches / damage on old photos).
+        Upload a photo, then run <strong>Colorize</strong> (B&amp;W → color).
         Processing uses{' '}
         <a href="https://replicate.com" target="_blank" rel="noreferrer">
           Replicate
@@ -84,37 +79,6 @@ export default function DashboardWorkspace() {
           </span>
         </div>
 
-        <div className="dashboardImageModeRow" role="group" aria-label="Processing mode">
-          <button
-            type="button"
-            className={`dashboardBtn ${mode === 'colorize' ? 'dashboardBtnPrimary' : 'dashboardBtnSecondary'}`}
-            onClick={() => setMode('colorize')}
-            disabled={loading}
-          >
-            Colorize
-          </button>
-          <button
-            type="button"
-            className={`dashboardBtn ${mode === 'restore' ? 'dashboardBtnPrimary' : 'dashboardBtnSecondary'}`}
-            onClick={() => setMode('restore')}
-            disabled={loading}
-          >
-            Restore
-          </button>
-        </div>
-
-        {mode === 'restore' && (
-          <label className="dashboardImageScratchLabel">
-            <input
-              type="checkbox"
-              checked={withScratch}
-              onChange={(e) => setWithScratch(e.target.checked)}
-              disabled={loading}
-            />
-            <span>Image has scratches / damage (better for torn or marked photos)</span>
-          </label>
-        )}
-
         <div className="dashboardImageWorkspaceActions">
           <button
             type="button"
@@ -122,7 +86,7 @@ export default function DashboardWorkspace() {
             onClick={handleRun}
             disabled={loading || !file}
           >
-            {loading ? 'Processing…' : 'Run'}
+            {loading ? 'Colorizing…' : 'Colorize'}
           </button>
         </div>
 

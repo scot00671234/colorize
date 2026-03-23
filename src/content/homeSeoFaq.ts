@@ -21,14 +21,6 @@ export const HOME_SEO_FAQ = [
     a: 'Scans of prints, phone photos of old pictures, and digital files with faded color or damage are typical candidates. Final quality depends on the source image and whether you colorize or restore.',
   },
   {
-    q: 'How is this different from a generic AI chat?',
-    a: 'Colorizer is built for image workflows—colorization and restoration in a dedicated workspace—not long-form text chat.',
-  },
-  {
-    q: 'Can I use results commercially?',
-    a: 'Check the Terms of Service and any provider rules for your plan. When in doubt, confirm rights for the underlying photograph before commercial use.',
-  },
-  {
     q: 'Do you store my originals?',
     a: 'Storage and retention policies are described in Privacy. Minimize sensitive uploads until you have reviewed those terms.',
   },

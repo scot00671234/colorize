@@ -5,10 +5,6 @@ import { config } from '../config.js'
 const DEFAULT_COLORIZE_MODEL =
   'piddnad/ddcolor:ca494ba129e44e45f661d6ece83c4c98a9a7c774309beca01429b58fce8aa695'
 
-/** Microsoft — scratch / damage restoration for old photos. */
-const DEFAULT_RESTORE_MODEL =
-  'microsoft/bringing-old-photos-back-to-life:c75db81db6cbd809d93cc3b7e7a088a351a3349c9fa02b6d393e35e0d51ba799'
-
 function getClient(): Replicate {
   const token = config.replicate.apiToken
   if (!token) {
@@ -43,31 +39,11 @@ function outputToUrl(raw: unknown): string {
   throw new Error('Unexpected model output (expected image URL)')
 }
 
-export type ImageProcessMode = 'colorize' | 'restore'
-
-export async function runReplicateImage(
-  mode: ImageProcessMode,
-  image: Buffer,
-  options: { withScratch?: boolean } = {}
-): Promise<string> {
+export async function runReplicateColorize(image: Buffer): Promise<string> {
   const replicate = getClient()
   const colorizeModel = config.replicate.colorizeModel || DEFAULT_COLORIZE_MODEL
-  const restoreModel = config.replicate.restoreModel || DEFAULT_RESTORE_MODEL
-
-  if (mode === 'colorize') {
-    const out = await replicate.run(colorizeModel as `${string}/${string}:${string}`, {
-      input: { image },
-    })
-    return outputToUrl(out)
-  }
-
-  const withScratch = options.withScratch !== false
-  const out = await replicate.run(restoreModel as `${string}/${string}:${string}`, {
-    input: {
-      image,
-      HR: false,
-      with_scratch: withScratch,
-    },
+  const out = await replicate.run(colorizeModel as `${string}/${string}:${string}`, {
+    input: { image },
   })
   return outputToUrl(out)
 }

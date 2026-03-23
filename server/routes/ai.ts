@@ -5,7 +5,7 @@ import { aiRateLimiter } from '../middleware/rateLimit'
 import { insertUsageLog } from '../middleware/usage'
 import type { JwtPayload } from '../middleware/auth'
 import { config } from '../config'
-import { runReplicateImage, type ImageProcessMode } from '../services/replicateImage'
+import { runReplicateColorize } from '../services/replicateImage'
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -24,20 +24,8 @@ const router = Router()
 router.use(aiRateLimiter)
 router.use(requireAuth)
 
-function parseMode(raw: unknown): ImageProcessMode | undefined {
-  if (raw === 'colorize' || raw === 'restore') return raw
-  return undefined
-}
-
-function parseWithScratch(raw: unknown): boolean | undefined {
-  if (raw === 'true' || raw === true) return true
-  if (raw === 'false' || raw === false) return false
-  return undefined
-}
-
 /**
- * POST /api/ai/process — multipart: field `image` (file), `mode` = colorize | restore,
- * optional `withScratch` = true | false (restore only; default true).
+ * POST /api/ai/process — multipart: field `image` (file), colorize only.
  */
 router.post('/process', (req, res, next) => {
   upload.single('image')(req, res, (err: unknown) => {
@@ -62,20 +50,10 @@ router.post('/process', (req, res, next) => {
     return
   }
 
-  const mode = parseMode(req.body?.mode)
-  if (!mode) {
-    res.status(400).json({ error: 'Invalid or missing mode. Use colorize or restore.' })
-    return
-  }
-
-  const scratchOpt = parseWithScratch(req.body?.withScratch)
-
   try {
-    const outputUrl = await runReplicateImage(mode, file.buffer, {
-      withScratch: mode === 'restore' ? scratchOpt !== false : undefined,
-    })
+    const outputUrl = await runReplicateColorize(file.buffer)
     await insertUsageLog(user.userId, 'image_process', null)
-    res.json({ outputUrl, mode })
+    res.json({ outputUrl, mode: 'colorize' })
   } catch (err) {
     console.error('Replicate image error:', err)
     const message = err instanceof Error ? err.message : 'Image processing failed.'

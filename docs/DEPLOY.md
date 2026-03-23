@@ -37,8 +37,8 @@ This means the **Docker build environment has run out of disk**. The app cannot 
 |----------|--------|
 | `NODE_ENV` | `production` |
 | `PORT` | Port the app listens on (e.g. `3001`); reverse proxy forwards here. |
-| `APP_BASE_URL` | Public HTTPS origin of the **browser app**, no trailing slash (e.g. `https://colorizer.app`). Used for email links, Stripe `success_url` / `cancel_url`, and default CORS. |
-| `CORS_ORIGINS` | Optional comma-separated list if the SPA is reachable on multiple origins (e.g. `https://colorizer.app,https://www.colorizer.app`). |
+| `APP_BASE_URL` | Public HTTPS origin of the **browser app**, no trailing slash (e.g. `https://colorizer.cc`). Used for email links, Stripe `success_url` / `cancel_url`, and default CORS. |
+| `CORS_ORIGINS` | Optional comma-separated list if the SPA is reachable on multiple origins (e.g. `https://colorizer.cc,https://www.colorizer.cc`). |
 | `DATABASE_URL` | Postgres URL; add `?sslmode=require` or set `DATABASE_SSL=true` for typical managed DBs. |
 | `JWT_SECRET` | Long random string (32+ characters). |
 | `REPLICATE_API_TOKEN` | Required for image processing. |
@@ -106,3 +106,4 @@ Run through this once after deploy:
 | **Stripe** | Test checkout (test mode) → success redirect to `/dashboard/settings`; webhook delivers (see `docs/STRIPE_WEBHOOK.md`). |
 | **CORS** | If using `www` + apex, set `CORS_ORIGINS` and confirm login from both. |
 | **Contact** | Support email shown in Contact / Privacy / Terms / Settings is **`bioqz-customer@outlook.com`** (update if you change branding). |
+

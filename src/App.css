@@ -4949,6 +4949,74 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   text-decoration: underline;
 }
 
+.dashboardWorkspaceQuota--secondary {
+  margin-top: -0.85rem;
+  margin-bottom: 1.25rem;
+  background: rgba(90, 122, 138, 0.06);
+}
+
+[data-theme="dark"] .dashboardWorkspaceQuota--secondary {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dashboardWorkspaceSaveSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--glass-border);
+  margin-top: 0.25rem;
+}
+
+.dashboardWorkspaceSaveLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dashboardWorkspaceSaveRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboardWorkspaceTitleInput {
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 22rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.dashboardWorkspaceTitleInput:focus {
+  border-color: var(--accent);
+}
+
+.dashboardWorkspaceSaveBtn {
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.dashboardWorkspaceSaveHint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.45;
+}
+
 .dashboardWorkspaceCard {
   margin-top: 0.25rem;
   padding: 1.75rem 1.75rem 2rem;

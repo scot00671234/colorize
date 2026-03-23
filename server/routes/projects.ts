@@ -11,6 +11,8 @@ import { effectivePaidPlan, projectLimitForPlan } from '../planConfig'
 const router = Router()
 
 const PROJECT_LIMIT_FALLBACK = 1
+/** Max stored JSON / HTML per project (colorize payloads may include a downscaled original). */
+const MAX_PROJECT_CONTENT_CHARS = 2_500_000
 
 async function getProjectLimit(userId: string): Promise<number> {
   if (!pool) return PROJECT_LIMIT_FALLBACK
@@ -77,10 +79,10 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 })
 
-/** POST /api/projects — create project (enforce limit) */
+/** POST /api/projects — create project (enforce limit); optional `content` for workspace payloads */
 router.post('/', async (req: Request, res: Response): Promise<void> => {
   const { user } = req as Request & { user: JwtPayload }
-  const { title } = (req.body as { title?: string }) || {}
+  const { title, content: bodyContent } = (req.body as { title?: string; content?: string }) || {}
   if (!pool) {
     res.status(503).json({ error: 'Database not configured' })
     return
@@ -98,10 +100,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     return
   }
   const name = typeof title === 'string' && title.trim() ? title.trim().slice(0, 255) : 'Untitled'
+  const content =
+    typeof bodyContent === 'string' ? bodyContent.slice(0, MAX_PROJECT_CONTENT_CHARS) : ''
   try {
     const result = await pool.query(
-      `INSERT INTO projects (user_id, title, content, job_description) VALUES ($1, $2, '', '') RETURNING id, title, content, job_description, created_at, updated_at`,
-      [user.userId, name]
+      `INSERT INTO projects (user_id, title, content, job_description) VALUES ($1, $2, $3, '') RETURNING id, title, content, job_description, created_at, updated_at`,
+      [user.userId, name, content]
     )
     res.status(201).json(result.rows[0])
   } catch (err) {
@@ -132,7 +136,7 @@ router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
   }
   if (typeof content === 'string') {
     updates.push(`content = $${pos++}`)
-    values.push(content)
+    values.push(content.slice(0, MAX_PROJECT_CONTENT_CHARS))
   }
   if (typeof jobDescription === 'string') {
     updates.push(`job_description = $${pos++}`)

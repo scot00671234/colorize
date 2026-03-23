@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../api/client'
+import { dashboardSnippetFromProjectContent } from '../utils/colorizeProject'
 
 type Project = { id: string; title: string; content: string; created_at: string; updated_at: string }
 
@@ -35,14 +36,14 @@ export default function DashboardHome() {
     <div className="dashboardPage dashboardPageOverview">
       <h1 className="dashboardPageTitle">Dashboard</h1>
       <p className="dashboardPageSubtitle dashboardPageSubtitleCentered">
-        Welcome back. Open a saved project or the workspace—photo colorization tools are on the way.
+        Welcome back. Open a saved colorization or start a new one in the workspace.
       </p>
 
       <div className="dashboardCard dashboardOverviewCard dashboardOverviewCardTight">
         <div className="dashboardWelcome">
           <p className="dashboardWelcomeTitle">Your saved projects</p>
           <p className="dashboardCardText dashboardWelcomeBody">
-            Click any project to open it in the workspace. Content from earlier versions is preserved.
+            Click a project to reopen it in the workspace. Names and previews come from what you saved.
           </p>
           <div className="dashboardWelcomeActions">
             <Link to="/dashboard/workspace" className="dashboardBtn dashboardBtnPrimary">
@@ -61,7 +62,7 @@ export default function DashboardHome() {
         ) : projects.length === 0 ? (
           <div className="dashboardCard">
             <p className="dashboardCardText">
-              No projects yet. Create one from the workspace when you are ready.
+              No projects yet. Colorize a photo in the workspace, then use <strong>Save to dashboard</strong>.
             </p>
             <div style={{ marginTop: '1rem' }}>
               <Link to="/dashboard/workspace" className="dashboardBtn dashboardBtnPrimary">
@@ -74,7 +75,8 @@ export default function DashboardHome() {
             <ul className="dashboardProjectsGrid">
               {projects.map((p) => {
                 const title = (p.title || 'Untitled').trim() || 'Untitled'
-                const snippet = snippetFromHtml(p.content || '')
+                const snippet =
+                  dashboardSnippetFromProjectContent(p.content || '') || snippetFromHtml(p.content || '')
                 return (
                   <li key={p.id}>
                     <Link to={`/dashboard/workspace?projectId=${p.id}`} className="dashboardProjectCard" aria-label={`Open project ${title}`}>

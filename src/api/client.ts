@@ -234,7 +234,7 @@ export const api = {
         created_at: string
         updated_at: string
       }>(`/api/projects/${id}`),
-    create: (title: string) =>
+    create: (title: string, content?: string) =>
       request<{
         id: string
         title: string
@@ -244,7 +244,7 @@ export const api = {
         updated_at: string
       }>('/api/projects', {
         method: 'POST',
-        body: JSON.stringify({ title }),
+        body: JSON.stringify(content != null ? { title, content } : { title }),
       }),
     update: (id: string, data: { title?: string; content?: string; jobDescription?: string }) =>
       request<{

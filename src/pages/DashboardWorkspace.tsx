@@ -67,7 +67,7 @@ export default function DashboardWorkspace() {
     try {
       const res = await api.ai.processImage(file)
       setOutputUrl(res.outputUrl)
-      void refreshUser()
+      await refreshUser()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {

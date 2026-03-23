@@ -23,10 +23,11 @@ export async function insertUsageLog(
 export async function countImageProcessThisMonth(userId: string): Promise<number> {
   if (!pool) return 0
   try {
+    // Column is `timestamp` per migration 002 (`created_at` was wrong and made COUNT always error → 0).
     const r = await pool.query(
       `SELECT COUNT(*)::int AS c FROM usage_logs
        WHERE user_id = $1 AND action_type = 'image_process'
-       AND created_at >= date_trunc('month', now())`,
+       AND "timestamp" >= date_trunc('month', now())`,
       [userId]
     )
     return typeof r.rows[0]?.c === 'number' ? r.rows[0].c : 0

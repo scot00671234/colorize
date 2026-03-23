@@ -289,12 +289,12 @@ export default function Landing() {
 
             <aside className="heroPreview" aria-label="Colorize before and after demo">
               <ColorizeBeforeAfter
-                imageSrc="/landing/vintage-cars-row.jpg"
-                imageDescription="1950s-style classic cars: compare monochrome on the left with full color on the right."
+                imageSrc="/landing/examples/example-detroit-cadillac-square.png"
+                imageDescription="Historic city square with streetcars and buildings: drag the slider to compare grayscale with full color."
               />
               <div className="heroPreviewTags heroPreviewTagsBelow" aria-label="What you get">
                 <span>AI colorization</span>
-                <span>Natural vintage tones</span>
+                <span>Street scenes &amp; portraits</span>
                 <span>Download from workspace</span>
               </div>
             </aside>
@@ -303,19 +303,19 @@ export default function Landing() {
 
         <section className="section pathSection" id="path" aria-label="Why photo restoration matters">
         <h2 className="pathSectionTitle">Every picture has a story</h2>
-        <div className="pathImagesRow" aria-label="Vintage photography examples">
+        <div className="pathImagesRow" aria-label="Colorized archival photography examples">
           <div className="landingPhotoCard pathImageTile">
             <img
-              src="/landing/vintage-classic-detail.jpg"
-              alt="Vintage automobile: chrome bumper and headlamp detail"
+              src="/landing/examples/example-buffalo-niagara-street.png"
+              alt="Colorized historical photograph of Niagara Street, Buffalo, with streetcars and ornate architecture"
               loading="lazy"
               decoding="async"
             />
           </div>
           <div className="landingPhotoCard pathImageTile">
             <img
-              src="/landing/vintage-demo.jpg"
-              alt="Classic red car — vintage automotive photography"
+              src="/landing/examples/example-london-1945.png"
+              alt="Colorized photograph of a child with a stuffed toy amid ruined buildings"
               loading="lazy"
               decoding="async"
             />
@@ -377,7 +377,7 @@ export default function Landing() {
           <div className="landingTrySplit">
             <div className="landingTryThumb" aria-hidden>
               <img
-                src="/landing/vintage-classic-detail.jpg"
+                src="/landing/examples/example-einstein-portrait.png"
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -420,8 +420,8 @@ export default function Landing() {
         <div className="aboutImageCenter">
           <div className="landingPhotoCard aboutImageCard">
             <img
-              src="/landing/vintage-cars-row.jpg"
-              alt="Row of classic 1950s-style cars at a show"
+              src="/landing/examples/example-migrant-mother.png"
+              alt="Colorized documentary-style photograph of a mother with children"
               loading="lazy"
               decoding="async"
             />

@@ -744,7 +744,183 @@ body[data-page="landing"] .navCta:hover {
   color: var(--text-primary);
 }
 
-/* Hero preview (right column) */
+/* —— Landing: colorize before/after slider —— */
+.landingPage .heroPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+  max-width: 28rem;
+  justify-self: end;
+}
+
+.colorizeBeforeAfter {
+  width: 100%;
+}
+
+.colorizeBeforeAfterCaption {
+  margin: 0 0 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.colorizeBeforeAfterCaption strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.colorizeBeforeAfterCaptionSub {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.colorizeBeforeAfterFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(90, 122, 138, 0.2);
+  box-shadow:
+    0 12px 40px -18px rgba(15, 23, 42, 0.35),
+    0 4px 16px -8px rgba(45, 55, 72, 0.2);
+  background: #1a1d24;
+}
+
+[data-theme="dark"] .colorizeBeforeAfterFrame {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 16px 48px -20px rgba(0, 0, 0, 0.65),
+    0 4px 16px -8px rgba(0, 0, 0, 0.4);
+}
+
+.colorizeBeforeAfterLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+.colorizeBeforeAfterColor {
+  z-index: 0;
+}
+
+.colorizeBeforeAfterClip {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.colorizeBeforeAfterMono {
+  filter: grayscale(1) contrast(1.1) brightness(0.9);
+}
+
+.colorizeBeforeAfterEdge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  margin-left: -2px;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.88) 50%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.12),
+    4px 0 24px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.colorizeBeforeAfterKnob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(165deg, var(--accent) 0%, var(--accent-strong) 100%);
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.colorizeBeforeAfterLabels {
+  position: absolute;
+  bottom: 0.65rem;
+  left: 0.65rem;
+  right: 0.65rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.colorizeBeforeAfterLabel {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: rgba(12, 14, 18, 0.55);
+  color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.colorizeBeforeAfterLabelAfter {
+  background: rgba(15, 81, 50, 0.65);
+  border-color: rgba(215, 255, 89, 0.25);
+}
+
+.colorizeBeforeAfterRange {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  z-index: 4;
+  cursor: grab;
+}
+
+.colorizeBeforeAfterRange:active {
+  cursor: grabbing;
+}
+
+.heroPreviewTagsBelow {
+  margin-top: 0;
+  justify-content: center;
+}
+
+@media (max-width: 960px) {
+  .landingPage .heroPreview {
+    justify-self: center;
+    max-width: 36rem;
+  }
+}
+
+/* Hero preview (right column) — legacy card layout */
 .heroMediaCard {
   height: 200px;
   border-radius: var(--radius-lg);
@@ -1434,7 +1610,7 @@ body[data-page="landing"] .navCta:hover {
 }
 
 .landingTryCard {
-  max-width: 42rem;
+  max-width: 52rem;
   margin: 0 auto;
   padding: 2rem;
   background: var(--glass-bg);
@@ -1446,6 +1622,124 @@ body[data-page="landing"] .navCta:hover {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.landingTrySplit {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.landingTryThumb {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  max-height: 280px;
+  border: 1px solid rgba(90, 122, 138, 0.18);
+  box-shadow: 0 12px 36px -16px rgba(15, 23, 42, 0.25);
+  background: #1a1d24;
+}
+
+.landingTryThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+}
+
+.landingTryBody {
+  min-width: 0;
+}
+
+.landingTrySteps {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.landingTrySteps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.landingTryStepNum {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 1px solid rgba(90, 122, 138, 0.22);
+  color: var(--accent-text);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.12rem;
+}
+
+.landingTryNote {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+}
+
+.landingTryActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.landingTryPrimaryCta {
+  text-decoration: none;
+}
+
+.landingTrySignIn {
+  font-size: 0.9375rem;
+}
+
+.landingTryWorkspaceLink {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.landingTryWorkspaceLink:hover {
+  color: var(--accent-text);
+  border-bottom-color: var(--accent);
+}
+
+.landingTryWorkspaceLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (max-width: 720px) {
+  .landingTrySplit {
+    grid-template-columns: 1fr;
+  }
+
+  .landingTryThumb {
+    max-height: 200px;
+    aspect-ratio: 16 / 9;
+    max-width: 100%;
+  }
 }
 
 .landingTryLabel {

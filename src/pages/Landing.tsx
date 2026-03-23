@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { ColorizeBeforeAfter } from '../components/ColorizeBeforeAfter'
 import { HOME_SEO_FAQ, HOME_SEO_KEYWORDS } from '../content/homeSeoFaq'
 import { getSiteUrl } from '../utils/siteUrl'
 import { setSeoMeta } from '../utils/seoMeta'
@@ -60,12 +61,12 @@ function BlobBottom() {
 const FEATURES = [
   { icon: '◇', title: 'Colorize', description: 'Turn black-and-white or faded images into full-color versions with AI tuned for portraits and scenes.' },
   { icon: '◆', title: 'Restore', description: 'Reduce cracks, blur, and noise so faces and detail read clearly on modern screens.' },
-  { icon: '○', title: 'Save and export', description: 'Organize projects in your dashboard and download results when processing goes live.' },
+  { icon: '○', title: 'Save and export', description: 'Organize projects in your dashboard and download finished images from the workspace.' },
 ] as const
 
 const PLANS = [
-  { name: 'Free', price: 0, period: 'month', description: 'Start with an account and saved projects. No credit card required.', features: ['1 saved project', 'Workspace access', 'Email support', 'Colorize & restore when live'], cta: 'Get started free', ctaTo: '/register', featured: false },
-  { name: 'Pro', price: 29, period: 'month', description: 'For growing archives and frequent batches.', features: ['10 saved projects', 'Everything in Free', 'Higher limits when processing ships', 'Cancel anytime'], cta: 'Start free trial', ctaTo: '/register', featured: true },
+  { name: 'Free', price: 0, period: 'month', description: 'Start with an account and saved projects. No credit card required.', features: ['1 saved project', 'Workspace access', 'Email support', 'Colorize & restore in workspace'], cta: 'Get started free', ctaTo: '/register', featured: false },
+  { name: 'Pro', price: 29, period: 'month', description: 'For growing archives and frequent batches.', features: ['10 saved projects', 'Everything in Free', 'Higher processing limits', 'Cancel anytime'], cta: 'Start free trial', ctaTo: '/register', featured: true },
   { name: 'Elite', price: 59, period: 'month', description: 'Maximum headroom for teams and power users.', features: ['100 saved projects', 'Everything in Pro', 'Priority for new features', 'Cancel anytime'], cta: 'Start free trial', ctaTo: '/register', featured: false },
 ] as const
 
@@ -199,46 +200,15 @@ export default function Landing() {
               </div>
             </div>
 
-            <aside className="heroPreview" aria-label="Product preview">
-              <div className="heroMediaCard" aria-hidden>
-                <img
-                  src="/landing/desk.png"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="heroPreviewCard">
-                <div className="heroPreviewTop">
-                  <div className="heroPreviewTitle">Example: Colorize</div>
-                  <div className="heroPreviewScore" aria-label="Preview mode">
-                    <span>AI</span>
-                  </div>
-                </div>
-                <div className="heroPreviewBar" aria-hidden>
-                  <span style={{ width: '72%' }} />
-                </div>
-
-                <div className="heroPreviewGrid" aria-label="Before and after colorization">
-                  <div className="heroPreviewCol">
-                    <div className="heroPreviewLabel">Before</div>
-                    <p className="heroPreviewText">
-                      Faded monochrome scan—faces and clothing lose warmth; the scene feels frozen in time.
-                    </p>
-                  </div>
-                  <div className="heroPreviewCol heroPreviewColAfter">
-                    <div className="heroPreviewLabel">After</div>
-                    <p className="heroPreviewText">
-                      Balanced color and contrast so skin tones, fabrics, and backgrounds feel natural on today’s displays.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="heroPreviewTags" aria-label="What improves">
-                  <span>Richer tones</span>
-                  <span>Sharper detail</span>
-                  <span>Share-ready</span>
-                </div>
+            <aside className="heroPreview" aria-label="Colorize before and after demo">
+              <ColorizeBeforeAfter
+                imageSrc="/landing/vintage-cars-row.jpg"
+                imageDescription="1950s-style classic cars: compare monochrome on the left with full color on the right."
+              />
+              <div className="heroPreviewTags heroPreviewTagsBelow" aria-label="What you get">
+                <span>AI colorization</span>
+                <span>Scratch-aware restore</span>
+                <span>Download from workspace</span>
               </div>
             </aside>
           </div>
@@ -246,19 +216,19 @@ export default function Landing() {
 
         <section className="section pathSection" id="path" aria-label="Why photo restoration matters">
         <h2 className="pathSectionTitle">Every picture has a story</h2>
-        <div className="pathImagesRow" aria-label="Professional workspace">
+        <div className="pathImagesRow" aria-label="Vintage photography examples">
           <div className="landingPhotoCard pathImageTile">
             <img
-              src="/landing/desk.png"
-              alt="A clean desk with laptop and notebook"
+              src="/landing/vintage-classic-detail.jpg"
+              alt="Vintage automobile: chrome bumper and headlamp detail"
               loading="lazy"
               decoding="async"
             />
           </div>
           <div className="landingPhotoCard pathImageTile">
             <img
-              src="/landing/conversation.png"
-              alt="Two people collaborating over a laptop"
+              src="/landing/vintage-demo.jpg"
+              alt="Classic red car — vintage automotive photography"
               loading="lazy"
               decoding="async"
             />
@@ -286,20 +256,43 @@ export default function Landing() {
 
         <section className="section landingTrySection" id="try">
         <div className="landingTryHeader">
-          <h2 className="landingTryTitle">Get ready to restore your archive</h2>
-          <p className="landingTrySubtitle">Create a free account now. Upload and colorize flows are next on the roadmap.</p>
+          <h2 className="landingTryTitle">Try it on your own photos</h2>
+          <p className="landingTrySubtitle">
+            Open the workspace, upload a scan or vintage shot, then run <strong>Colorize</strong> or <strong>Restore</strong>. No credit card to get started.
+          </p>
         </div>
         <div className="landingTryCard">
-          <p className="landingTryHint" style={{ margin: 0, maxWidth: '42rem' }}>
-            We are finishing the image pipeline. Meanwhile you can use the dashboard for projects and settings—no credit card required.
-          </p>
-          <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-            <Link to="/register" className="landingTryCta" style={{ textDecoration: 'none', display: 'inline-block' }}>
-              Create free account
-            </Link>
-            <Link to="/login" className="landingTryLoginLink">
-              Sign in
-            </Link>
+          <div className="landingTrySplit">
+            <div className="landingTryThumb" aria-hidden>
+              <img
+                src="/landing/vintage-classic-detail.jpg"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div className="landingTryBody">
+              <ul className="landingTrySteps">
+                <li><span className="landingTryStepNum">1</span> Create a free account</li>
+                <li><span className="landingTryStepNum">2</span> Go to <strong>Dashboard → Workspace</strong></li>
+                <li><span className="landingTryStepNum">3</span> Upload an image and pick colorize or restore</li>
+                <li><span className="landingTryStepNum">4</span> Preview the result and download when you are happy</li>
+              </ul>
+              <p className="landingTryNote">
+                Upload from your device; processing runs in the cloud so your machine stays light. Save projects in your account and come back anytime.
+              </p>
+              <div className="landingTryActions">
+                <Link to="/register" className="heroCta heroCtaPrimary landingTryPrimaryCta">
+                  Create free account
+                </Link>
+                <Link to="/login" className="landingTryLoginLink landingTrySignIn">
+                  Sign in
+                </Link>
+                <Link to="/dashboard/workspace" className="landingTryWorkspaceLink">
+                  Open workspace
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -315,8 +308,8 @@ export default function Landing() {
         <div className="aboutImageCenter">
           <div className="landingPhotoCard aboutImageCard">
             <img
-              src="/landing/typing.png"
-              alt="Working at a desk with keyboard and computer"
+              src="/landing/vintage-cars-row.jpg"
+              alt="Row of classic 1950s-style cars at a show"
               loading="lazy"
               decoding="async"
             />
@@ -327,10 +320,10 @@ export default function Landing() {
             <li><strong>Upload</strong> scans, phone photos of prints, or digital files from your archive.</li>
             <li><strong>Colorize</strong> monochrome or washed-out images with models tuned for people and scenes.</li>
             <li><strong>Restore</strong> cracks, blur, and noise so detail comes through.</li>
-            <li><strong>Save projects</strong> in your dashboard and export when processing is live.</li>
+            <li><strong>Save projects</strong> in your dashboard, preview results, and download from the workspace.</li>
           </ul>
           <p className="aboutFootnote">
-            <strong>Free tier:</strong> account and project slots today; heavier processing limits will align with plans when colorization ships. Cancel anytime.
+            <strong>Free tier:</strong> account and project slots; usage limits follow your plan as you scale. Cancel anytime.
           </p>
         </div>
       </section>
@@ -380,7 +373,7 @@ export default function Landing() {
             Common questions about photo AI
           </h2>
           <p className="landingFaqIntro">
-            Quick answers while we ship upload and processing. Policies may evolve as features go live.
+            Straight answers about colorizing, restoring, privacy, and plans.
           </p>
         </div>
         <dl className="landingFaqList">
@@ -396,8 +389,8 @@ export default function Landing() {
         <section className="section ctaSection">
         <div className="ctaBox">
           <h2>Your archive deserves another life.</h2>
-          <p>Join free. Projects and settings work today; colorization is next. No credit card.</p>
-          <Link to="/register" className="heroCta">Get started free</Link>
+          <p>Join free, open the workspace, and colorize or restore your photos. No credit card.</p>
+          <Link to="/register" className="heroCta heroCtaPrimary">Get started free</Link>
         </div>
       </section>
 

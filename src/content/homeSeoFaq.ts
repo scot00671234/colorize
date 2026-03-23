@@ -2,27 +2,27 @@
 export const HOME_SEO_FAQ = [
   {
     q: 'What does Colorizer do?',
-    a: 'Colorizer is becoming an AI-powered tool to colorize and restore old or faded photos. You will upload an image, choose colorize or restore, and download the result—built for family archives, scans, and creative workflows.',
+    a: 'Colorizer uses AI to colorize black-and-white or faded photos and to restore damaged scans. You upload an image in the workspace, choose colorize or restore, preview the result, and download—built for family archives, scans, and creative workflows.',
   },
   {
-    q: 'When will photo colorization be available?',
-    a: 'The app is in transition: accounts, projects, and billing work today; the image pipeline is rolling out next. Create a free account to get updates as features go live.',
+    q: 'Where do I run colorization?',
+    a: 'After you sign in, open Dashboard → Workspace. Upload a JPEG, PNG, WebP, or GIF, pick Colorize or Restore, and run processing. Preview the output on the same screen and download when you are happy with it.',
   },
   {
     q: 'Is Colorizer free to try?',
-    a: 'Yes. You can start free with no credit card. Paid plans add higher project limits and will include more processing headroom when colorization ships.',
+    a: 'Yes. You can start free with no credit card. Paid plans add more saved projects and higher usage headroom for frequent batches.',
   },
   {
     q: 'Will my photos stay private?',
-    a: 'We treat uploads with care. Follow the Privacy Policy for retention and processing details as the image features launch.',
+    a: 'We treat uploads with care. Follow the Privacy Policy for retention, processing, and how long files may be kept.',
   },
   {
     q: 'What kinds of photos work best?',
-    a: 'Scans of prints, phone photos of old pictures, and digital files with faded color or damage are typical candidates. Final quality depends on the source image and the model you choose when the feature is available.',
+    a: 'Scans of prints, phone photos of old pictures, and digital files with faded color or damage are typical candidates. Final quality depends on the source image and whether you colorize or restore.',
   },
   {
     q: 'How is this different from a generic AI chat?',
-    a: 'Colorizer is focused on image workflows—colorization and restoration—not long-form text chat. The dashboard will center on uploads, previews, and exports.',
+    a: 'Colorizer is built for image workflows—colorization and restoration in a dedicated workspace—not long-form text chat.',
   },
   {
     q: 'Can I use results commercially?',

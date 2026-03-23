@@ -66,6 +66,35 @@ const FEATURES = [
   { icon: '○', title: 'Save and export', description: 'Organize projects in your dashboard and download finished images from the workspace.' },
 ] as const
 
+/** Colorized archival-style photos shown as visual reference (not claimed as product output). */
+const EXAMPLE_GALLERY = [
+  {
+    src: '/landing/examples/example-buffalo-niagara-street.png',
+    alt: 'Colorized historical photograph of a busy Niagara Street in Buffalo, New York, with streetcars, carriages, and ornate stone buildings.',
+    caption: 'City streets — architecture, signage, and crowds',
+  },
+  {
+    src: '/landing/examples/example-london-1945.png',
+    alt: 'Colorized photograph of a young child sitting on rubble holding a stuffed toy, ruined buildings in the background.',
+    caption: 'Human stories — faces, fabric, and atmosphere',
+  },
+  {
+    src: '/landing/examples/example-detroit-cadillac-square.png',
+    alt: 'Colorized wide view of Cadillac Square in Detroit with streetcars, early automobiles, and pedestrians.',
+    caption: 'Complex scenes — vehicles, pavement, and sky',
+  },
+  {
+    src: '/landing/examples/example-einstein-portrait.png',
+    alt: 'Colorized portrait of Albert Einstein in a tweed jacket against a dark soft-focus background.',
+    caption: 'Portraits — hair, skin, and clothing texture',
+  },
+  {
+    src: '/landing/examples/example-migrant-mother.png',
+    alt: 'Colorized documentary photograph of a worried mother with children, tent interior behind them.',
+    caption: 'Archival film look — grain, muted tones, fabric detail',
+  },
+] as const
+
 const PLANS: readonly {
   name: string
   planKey: CheckoutPlan
@@ -312,6 +341,31 @@ export default function Landing() {
         </div>
       </section>
 
+        <section className="section landingExamplesSection" id="examples" aria-labelledby="landing-examples-heading">
+        <div className="sectionHeader landingExamplesHeader">
+          <p className="sectionLabel">Examples</p>
+          <h2 id="landing-examples-heading" className="sectionTitle">
+            What careful color can look like
+          </h2>
+          <p className="landingExamplesLead">
+            Historical and documentary images colorized with natural palettes—street scenes, portraits, and fragile prints. Your own uploads in the workspace may differ based on source quality and subject.
+          </p>
+        </div>
+        <div className="landingExamplesGrid">
+          {EXAMPLE_GALLERY.map((item) => (
+            <figure key={item.src} className="landingExampleCard">
+              <div className="landingPhotoCard landingExampleImageWrap">
+                <img src={item.src} alt={item.alt} loading="lazy" decoding="async" />
+              </div>
+              <figcaption className="landingExampleCaption">{item.caption}</figcaption>
+            </figure>
+          ))}
+        </div>
+        <p className="landingExamplesDisclaimer">
+          Shown for inspiration. Some sources include third-party watermarks on the originals. Results from Colorizer depend on your file.
+        </p>
+      </section>
+
         <section className="section landingTrySection" id="try">
         <div className="landingTryHeader">
           <h2 className="landingTryTitle">Try it on your own photos</h2>
@@ -462,6 +516,7 @@ export default function Landing() {
           <Link to="/" className="footerBrand">Colorizer</Link>
           <div className="footerLinks">
             <a href="/#about">About</a>
+            <a href="/#examples">Examples</a>
             <a href="/#features">Features</a>
             <a href="/#pricing">Pricing</a>
             <Link to="/contact">Contact</Link>

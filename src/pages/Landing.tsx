@@ -207,7 +207,7 @@ export default function Landing() {
               />
               <div className="heroPreviewTags heroPreviewTagsBelow" aria-label="What you get">
                 <span>AI colorization</span>
-                <span>Scratch-aware restore</span>
+                <span>Natural vintage tones</span>
                 <span>Download from workspace</span>
               </div>
             </aside>

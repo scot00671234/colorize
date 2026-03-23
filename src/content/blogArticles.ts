@@ -101,7 +101,7 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         type: 'p',
-        text: 'The dashboard lists saved projects for organization. Upgrade in Settings when you need higher project limits; Stripe handles subscription management. Image processing uses your Replicate account via the server—ensure REPLICATE_API_TOKEN is set in production.',
+        text: 'The dashboard lists saved projects for organization. Choose Starter, Pro, or Studio in Settings; Stripe handles subscription and plan changes. Image processing runs on the server within your plan’s monthly colorization allowance.',
       },
     ],
   },

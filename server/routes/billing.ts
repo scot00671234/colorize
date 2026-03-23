@@ -4,9 +4,34 @@ import { pool } from '../db'
 import { config } from '../config'
 import { requireAuth } from '../middleware/auth'
 import type { JwtPayload } from '../middleware/auth'
+import {
+  normalizeCheckoutPlan,
+  priceIdForPlan,
+  planFromPriceId,
+  envVarHintForPlan,
+  type PaidPlan,
+} from '../planConfig'
 
 const router = Router()
 const stripe = config.stripe.secretKey ? new Stripe(config.stripe.secretKey) : null
+
+function subscriptionStateFromStripeSub(sub: Stripe.Subscription): {
+  subscriptionPlan: string | null
+  isPro: boolean
+  isTeam: boolean
+} {
+  const active = sub.status === 'active' || sub.status === 'trialing'
+  const rawPrice = sub.items?.data?.[0]?.price?.id
+  const priceId = typeof rawPrice === 'string' ? rawPrice : undefined
+  if (!active) {
+    return { subscriptionPlan: null, isPro: false, isTeam: false }
+  }
+  const paid = planFromPriceId(priceId)
+  if (paid) {
+    return { subscriptionPlan: paid, isPro: true, isTeam: paid === 'studio' }
+  }
+  return { subscriptionPlan: null, isPro: true, isTeam: false }
+}
 
 function billingNotConfigured(res: Response): boolean {
   if (!stripe) {
@@ -20,13 +45,17 @@ function billingNotConfigured(res: Response): boolean {
 router.post('/create-checkout-session', requireAuth, async (req: Request, res: Response): Promise<void> => {
   if (billingNotConfigured(res)) return
   const { user } = req as Request & { user: JwtPayload }
-  const { plan } = (req.body as { plan?: string }) || {}
-  const isElite = plan === 'elite' || plan === 'enterprise'
-  const priceId = isElite ? config.stripe.priceElite : config.stripe.pricePro
+  const { plan: rawPlan } = (req.body as { plan?: string }) || {}
+  const paidPlan = normalizeCheckoutPlan(rawPlan !== undefined && rawPlan !== '' ? rawPlan : 'pro')
+  if (!paidPlan) {
+    res.status(400).json({ error: 'Invalid plan. Use starter, pro, or studio.' })
+    return
+  }
+  const priceId = priceIdForPlan(paidPlan)
   if (!priceId) {
-    const envVar = isElite ? 'STRIPE_PRICE_ELITE' : 'STRIPE_PRICE_PRO'
+    const envVar = envVarHintForPlan(paidPlan)
     res.status(400).json({
-      error: `Stripe price not configured. Set ${envVar} in .env. In Stripe Dashboard → Products → your product → add a Price, then copy the full Price ID (e.g. price_1ABC123...).`,
+      error: `Stripe price not configured. Set ${envVar} in .env. In Stripe Dashboard → Products → add a recurring Price, then copy the full Price ID (e.g. price_1ABC123...).`,
     })
     return
   }
@@ -48,8 +77,7 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
       customer_email: user.email,
     })
     console.log('[stripe-checkout] session created', {
-      plan,
-      isElite,
+      plan: paidPlan,
       priceId,
       customer_email: user.email,
       sessionId: session.id,
@@ -60,7 +88,7 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
     const rawMessage = err instanceof Error ? err.message : 'Failed to create checkout session'
     const isNoSuchPrice = /no such price|resource_missing|Invalid request/i.test(rawMessage)
     const message = isNoSuchPrice
-      ? 'That Stripe Price ID was not found. In Stripe Dashboard go to Products → your product → copy the full Price ID (it looks like price_1ABC123..., not a short value like price_29). Update STRIPE_PRICE_PRO or STRIPE_PRICE_ELITE in your server env and redeploy.'
+      ? 'That Stripe Price ID was not found. In Stripe Dashboard go to Products → copy the full Price ID (price_1ABC123...). Update STRIPE_PRICE_STARTER, STRIPE_PRICE_PRO, and STRIPE_PRICE_STUDIO (or STRIPE_PRICE_ELITE) in your server env and redeploy.'
       : rawMessage
     res.status(500).json({ error: `Checkout failed: ${message}` })
   }
@@ -76,6 +104,8 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
     res.status(503).json({ error: 'Database not configured' })
     return
   }
+
+  const targetPlanForPortal: PaidPlan | null = plan ? normalizeCheckoutPlan(plan) : null
 
   try {
     const result = await pool.query(
@@ -94,11 +124,10 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
     // If a target plan is provided, deep-link into a subscription update confirmation flow.
     // This upgrades/downgrades the EXISTING subscription (proper proration/payment handled by Stripe),
     // instead of creating a second subscription via Checkout.
-    if (plan === 'elite' || plan === 'pro') {
-      const targetPriceId = plan === 'elite' ? config.stripe.priceElite : config.stripe.pricePro
+    if (targetPlanForPortal) {
+      const targetPriceId = priceIdForPlan(targetPlanForPortal)
       if (!targetPriceId) {
-        const envVar = plan === 'elite' ? 'STRIPE_PRICE_ELITE' : 'STRIPE_PRICE_PRO'
-        res.status(400).json({ error: `Stripe price not configured. Set ${envVar} in .env.` })
+        res.status(400).json({ error: `Stripe price not configured. Set ${envVarHintForPlan(targetPlanForPortal)} in .env.` })
         return
       }
 
@@ -135,8 +164,8 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
     const e = err as { message?: string; raw?: { message?: string } }
     const stripeMsg = e?.raw?.message || e?.message || (err instanceof Error ? err.message : '')
     const hint =
-      plan === 'elite' || plan === 'pro'
-        ? ' For Pro→Elite upgrades: Stripe Dashboard → Settings → Billing → Customer portal → enable “Subscription update”, and add both Pro and Elite products (prices) under products customers can switch to.'
+      targetPlanForPortal
+        ? ' In Stripe Dashboard → Settings → Billing → Customer portal, enable “Subscription update” and allow Starter, Pro, and Studio prices so customers can switch plans.'
         : ''
     const error =
       stripeMsg && stripeMsg.length < 500
@@ -181,11 +210,14 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
     res.status(400).json({ error: 'Invalid signature' })
     return
   }
-  const priceElite = config.stripe.priceElite || ''
   console.log('[stripe-webhook]', {
     eventId: event.id,
     type: event.type,
-    priceEliteConfigured: !!priceElite,
+    stripePricesConfigured: {
+      starter: !!config.stripe.priceStarter,
+      pro: !!config.stripe.pricePro,
+      studio: !!(config.stripe.priceStudio || config.stripe.priceElite),
+    },
   })
 
   async function getCustomerEmail(customerId: string): Promise<string | undefined> {
@@ -196,18 +228,6 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
       return email?.trim().toLowerCase() || undefined
     } catch (e) {
       console.warn('Stripe: failed to retrieve customer for email:', customerId)
-      return undefined
-    }
-  }
-
-  async function getTierFromSubscriptionId(subscriptionId: string): Promise<{ isPro: boolean; isTeam: boolean } | undefined> {
-    if (!stripe) return undefined
-    try {
-      // Expand so we can reliably read the price id from items.data.price.
-      const sub = await stripe.subscriptions.retrieve(subscriptionId, { expand: ['items.data.price'] })
-      return subscriptionTier(sub as Stripe.Subscription)
-    } catch (e) {
-      console.warn('Stripe: failed to retrieve subscription for tier:', subscriptionId)
       return undefined
     }
   }
@@ -235,37 +255,38 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
       }
       email = typeof email === 'string' ? email.trim().toLowerCase() : undefined
 
-      // For checkout.session.completed we should mark the user as paid immediately.
-      // Derive tier from the purchased price id rather than subscription status (which may not be "active" yet).
-      let isPro = true
+      // Mark paid from checkout: derive plan from subscription price id (status may still be pending).
+      let isPro = false
       let isTeam = false
+      let subscriptionPlan: string | null = null
       if (typeof session.subscription === 'string') {
         const priceId = await getPriceIdFromSubscriptionId(session.subscription)
+        const paid = planFromPriceId(priceId)
+        subscriptionPlan = paid
+        isPro = true
+        isTeam = paid === 'studio'
         console.log('[stripe-webhook] checkout:', {
           customerId,
           email,
           subscriptionId: session.subscription,
           priceId,
-          priceElite,
+          subscriptionPlan,
         })
-        if (priceElite && priceId && priceId === priceElite) isTeam = true
       }
 
       if (email) {
         try {
-          console.log('[stripe-webhook] updating user tier by email', { email, isPro, isTeam })
+          console.log('[stripe-webhook] updating user tier by email', { email, isPro, isTeam, subscriptionPlan })
           const result = await pool.query(
-            'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, updated_at = now() WHERE LOWER(email) = LOWER($4)',
-            [customerId, isPro, isTeam, email]
+            'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, subscription_plan = $4, updated_at = now() WHERE LOWER(email) = LOWER($5)',
+            [customerId, isPro, isTeam, subscriptionPlan, email]
           )
           console.log('[stripe-webhook] users rows updated (email match)', { rowCount: result.rowCount })
 
           if (result.rowCount === 0) {
-            // Fallback: sometimes existing users already have stripe_customer_id stored,
-            // but email casing can differ. Try updating by stripe_customer_id.
             const resultByStripeId = await pool.query(
-              'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
-              [isPro, isTeam, customerId]
+              'UPDATE users SET is_pro = $1, is_team = $2, subscription_plan = $3, updated_at = now() WHERE stripe_customer_id = $4',
+              [isPro, isTeam, subscriptionPlan, customerId]
             )
             console.log('[stripe-webhook] users rows updated (stripe_customer_id match)', {
               rowCount: resultByStripeId.rowCount,
@@ -279,30 +300,24 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
       }
     }
   }
-  function subscriptionTier(sub: Stripe.Subscription): { isPro: boolean; isTeam: boolean } {
-    const priceId = sub.items?.data?.[0]?.price?.id ?? ''
-    const isTeam = !!priceElite && priceId === priceElite
-    const isPro = sub.status === 'active' || sub.status === 'trialing'
-    return { isPro, isTeam: isPro && isTeam }
-  }
   if (event.type === 'customer.subscription.created' && event.data.object) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-    const { isPro, isTeam } = subscriptionTier(sub)
+    const { isPro, isTeam, subscriptionPlan } = subscriptionStateFromStripeSub(sub)
     if (customerId && pool) {
       try {
         const email = await getCustomerEmail(customerId)
         if (email) {
-          console.log('[stripe-webhook] subscription.created:', { customerId, email, isPro, isTeam })
+          console.log('[stripe-webhook] subscription.created:', { customerId, email, isPro, isTeam, subscriptionPlan })
           await pool.query(
-            'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, updated_at = now() WHERE LOWER(email) = LOWER($4)',
-            [customerId, isPro, isTeam, email]
+            'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, subscription_plan = $4, updated_at = now() WHERE LOWER(email) = LOWER($5)',
+            [customerId, isPro, isTeam, subscriptionPlan, email]
           )
         } else {
           console.warn('[stripe-webhook] subscription.created: missing customer email', { customerId, isPro, isTeam })
           await pool.query(
-            'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
-            [isPro, isTeam, customerId]
+            'UPDATE users SET is_pro = $1, is_team = $2, subscription_plan = $3, updated_at = now() WHERE stripe_customer_id = $4',
+            [isPro, isTeam, subscriptionPlan, customerId]
           )
         }
       } catch (err) {
@@ -313,21 +328,21 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
   if (event.type === 'customer.subscription.updated' && event.data.object) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-    const { isPro, isTeam } = subscriptionTier(sub)
+    const { isPro, isTeam, subscriptionPlan } = subscriptionStateFromStripeSub(sub)
     if (customerId && pool) {
       try {
         const email = await getCustomerEmail(customerId)
         if (email) {
-          console.log('[stripe-webhook] subscription.updated:', { customerId, email, isPro, isTeam })
+          console.log('[stripe-webhook] subscription.updated:', { customerId, email, isPro, isTeam, subscriptionPlan })
           await pool.query(
-            'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, updated_at = now() WHERE LOWER(email) = LOWER($4)',
-            [customerId, isPro, isTeam, email]
+            'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, subscription_plan = $4, updated_at = now() WHERE LOWER(email) = LOWER($5)',
+            [customerId, isPro, isTeam, subscriptionPlan, email]
           )
         } else {
           console.warn('[stripe-webhook] subscription.updated: missing customer email', { customerId, isPro, isTeam })
           await pool.query(
-            'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE stripe_customer_id = $3',
-            [isPro, isTeam, customerId]
+            'UPDATE users SET is_pro = $1, is_team = $2, subscription_plan = $3, updated_at = now() WHERE stripe_customer_id = $4',
+            [isPro, isTeam, subscriptionPlan, customerId]
           )
         }
       } catch (err) {
@@ -342,7 +357,7 @@ router.post('/stripe-webhook', async (req: Request, res: Response): Promise<void
       try {
         console.log('[stripe-webhook] subscription.deleted:', { customerId })
         await pool.query(
-          'UPDATE users SET is_pro = false, is_team = false, updated_at = now() WHERE stripe_customer_id = $1',
+          'UPDATE users SET is_pro = false, is_team = false, subscription_plan = NULL, updated_at = now() WHERE stripe_customer_id = $1',
           [customerId]
         )
       } catch (err) {

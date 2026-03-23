@@ -18,3 +18,20 @@ export async function insertUsageLog(
     console.error('insertUsageLog:', err)
   }
 }
+
+/** Calendar month in the database session timezone (use UTC DB/session for consistent billing). */
+export async function countImageProcessThisMonth(userId: string): Promise<number> {
+  if (!pool) return 0
+  try {
+    const r = await pool.query(
+      `SELECT COUNT(*)::int AS c FROM usage_logs
+       WHERE user_id = $1 AND action_type = 'image_process'
+       AND created_at >= date_trunc('month', now())`,
+      [userId]
+    )
+    return typeof r.rows[0]?.c === 'number' ? r.rows[0].c : 0
+  } catch (err) {
+    console.error('countImageProcessThisMonth:', err)
+    return 0
+  }
+}

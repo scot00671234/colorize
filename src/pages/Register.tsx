@@ -1,7 +1,8 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api, getGoogleAuthUrl } from '../api/client'
+import { isCheckoutPlan } from '../constants/plans'
 
 export default function Register() {
   const [email, setEmail] = useState('')
@@ -10,11 +11,25 @@ export default function Register() {
   const [resendLoading, setResendLoading] = useState(false)
   const [resendMessage, setResendMessage] = useState<string | null>(null)
   const { register, error, clearError } = useAuth()
+  const [searchParams] = useSearchParams()
+  const planParam = searchParams.get('plan')
+  const loginHref =
+    planParam && isCheckoutPlan(planParam) ? `/login?plan=${planParam}` : '/login'
+  const googleReturnTo =
+    planParam && isCheckoutPlan(planParam)
+      ? `/dashboard/settings?checkout=${planParam}`
+      : '/dashboard'
 
   useEffect(() => {
     document.body.dataset.page = 'auth'
     return () => { delete document.body.dataset.page }
   }, [])
+
+  useEffect(() => {
+    if (planParam && isCheckoutPlan(planParam)) {
+      sessionStorage.setItem('pendingCheckoutPlan', planParam)
+    }
+  }, [planParam])
 
   useEffect(() => { clearError() }, [clearError])
 
@@ -57,7 +72,11 @@ export default function Register() {
             </button>
           </p>
           <p className="authFooter">
-            Wrong email? <Link to="/register">Sign up again</Link> · <Link to="/login">Sign in</Link>
+            Wrong email?{' '}
+            <Link to={planParam && isCheckoutPlan(planParam) ? `/register?plan=${planParam}` : '/register'}>
+              Sign up again
+            </Link>{' '}
+            · <Link to={loginHref}>Sign in</Link>
           </p>
         </div>
       </div>
@@ -68,7 +87,9 @@ export default function Register() {
     <div className="authPage">
       <div className="authCard">
         <h1 className="authTitle">Create account</h1>
-        <p className="authSubtitle">Get started with a free account.</p>
+        <p className="authSubtitle">
+          Create your account, then subscribe to Starter, Pro, or Studio to use colorization in the workspace.
+        </p>
         {error && <div className="authError" role="alert">{error}</div>}
         <form onSubmit={handleSubmit} className="authForm">
           <label className="authLabel">
@@ -98,11 +119,11 @@ export default function Register() {
           <button type="submit" className="authSubmit">Create account</button>
         </form>
         <div className="authDivider">or</div>
-        <a href={getGoogleAuthUrl('/dashboard')} className="authGoogleBtn" data-auth="google">
+        <a href={getGoogleAuthUrl(googleReturnTo)} className="authGoogleBtn" data-auth="google">
           Continue with Google
         </a>
         <p className="authFooter">
-          Already have an account? <Link to="/login">Sign in</Link>
+          Already have an account? <Link to={loginHref}>Sign in</Link>
         </p>
       </div>
     </div>

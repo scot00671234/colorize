@@ -169,7 +169,10 @@ export const api = {
           createdAt: string
           isPro?: boolean
           isTeam?: boolean
+          subscriptionPlan?: 'starter' | 'pro' | 'studio' | null
           projectLimit?: number
+          colorizeLimitMonthly?: number
+          colorizeUsedThisMonth?: number
         }
       }>('/api/auth/me'),
 
@@ -182,10 +185,10 @@ export const api = {
         body: JSON.stringify({ plan: plan || 'pro' }),
       }),
 
-    createPortalSession: (plan?: 'pro' | 'elite') =>
+    createPortalSession: (plan?: 'starter' | 'pro' | 'studio' | 'elite') =>
       request<{ url: string }>('/api/auth/create-portal-session', {
         method: 'POST',
-        body: JSON.stringify(plan ? { plan } : {}),
+        body: JSON.stringify(plan ? { plan: plan === 'elite' ? 'studio' : plan } : {}),
       }),
   },
 

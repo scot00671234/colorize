@@ -9,8 +9,8 @@ export const HOME_SEO_FAQ = [
     a: 'After you sign in, open Dashboard → Workspace. Upload a JPEG, PNG, WebP, or GIF, pick Colorize or Restore, and run processing. Preview the output on the same screen and download when you are happy with it.',
   },
   {
-    q: 'Is Colorizer free to try?',
-    a: 'Yes. You can start free with no credit card. Paid plans add more saved projects and higher usage headroom for frequent batches.',
+    q: 'How does pricing work?',
+    a: 'Colorizer is subscription-based: Starter (~400 colorizations/mo), Pro (~1,500/mo), and Studio (~8,000/mo), each with higher saved-project limits. You create an account first, then checkout runs in Stripe. Monthly colorization counts reset each calendar month.',
   },
   {
     q: 'Will my photos stay private?',

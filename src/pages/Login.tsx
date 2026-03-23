@@ -1,7 +1,8 @@
 import { useState, useEffect, FormEvent } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getGoogleAuthUrl } from '../api/client'
+import { isCheckoutPlan } from '../constants/plans'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -9,6 +10,18 @@ export default function Login() {
   const { login, error, clearError } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const planFromUrl = searchParams.get('plan')
+  const checkoutReturn =
+    planFromUrl && isCheckoutPlan(planFromUrl)
+      ? `/dashboard/settings?checkout=${planFromUrl}`
+      : null
+  const registerHref =
+    planFromUrl && isCheckoutPlan(planFromUrl) ? `/register?plan=${planFromUrl}` : '/register'
+  const googleReturnTo =
+    checkoutReturn ||
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    '/dashboard'
   const successMessage = (location.state as { message?: string } | null)?.message
   const [googleError, setGoogleError] = useState<string | null>(null)
 
@@ -43,6 +56,15 @@ export default function Login() {
     setGoogleError(null)
     try {
       await login(email, password)
+      const pending = sessionStorage.getItem('pendingCheckoutPlan')
+      const plan =
+        (planFromUrl && isCheckoutPlan(planFromUrl) ? planFromUrl : null) ||
+        (pending && isCheckoutPlan(pending) ? pending : null)
+      if (plan) {
+        sessionStorage.removeItem('pendingCheckoutPlan')
+        navigate(`/dashboard/settings?checkout=${plan}`, { replace: true })
+        return
+      }
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname
       const goTo = from && from.startsWith('/dashboard') ? from : '/dashboard'
       navigate(goTo, { replace: true })
@@ -87,11 +109,11 @@ export default function Login() {
           <button type="submit" className="authSubmit">Sign in</button>
         </form>
         <div className="authDivider">or</div>
-        <a href={getGoogleAuthUrl((location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard')} className="authGoogleBtn" data-auth="google">
+        <a href={getGoogleAuthUrl(googleReturnTo)} className="authGoogleBtn" data-auth="google">
           Continue with Google
         </a>
         <p className="authFooter">
-          Don’t have an account? <Link to="/register">Sign up</Link>
+          Don’t have an account? <Link to={registerHref}>Sign up</Link>
         </p>
       </div>
     </div>

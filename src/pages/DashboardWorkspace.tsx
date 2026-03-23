@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useId, useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import { useAuth } from '../contexts/AuthContext'
 
-/**
- * Image workspace: upload → colorize via Replicate.
- */
+/** Image workspace: upload and colorize photos. */
 export default function DashboardWorkspace() {
+  const { user, refreshUser } = useAuth()
   const inputId = useId()
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [outputUrl, setOutputUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    refreshUser()
+  }, [refreshUser])
 
   useEffect(() => {
     if (!file) {
@@ -43,26 +47,40 @@ export default function DashboardWorkspace() {
     try {
       const res = await api.ai.processImage(file)
       setOutputUrl(res.outputUrl)
+      void refreshUser()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       setLoading(false)
     }
-  }, [file])
+  }, [file, refreshUser])
+
+  const plan = user?.subscriptionPlan
+  const colorizeUsed = user?.colorizeUsedThisMonth
+  const colorizeLimit = user?.colorizeLimitMonthly
 
   return (
-    <div className="dashboardPage">
+    <div className="dashboardPage dashboardWorkspacePage">
       <h1 className="dashboardPageTitle">Workspace</h1>
       <p className="dashboardPageSubtitle">
-        Upload a photo, then run <strong>Colorize</strong> (B&amp;W → color).
-        Processing uses{' '}
-        <a href="https://replicate.com" target="_blank" rel="noreferrer">
-          Replicate
-        </a>
-        .
+        Upload a photo, then run <strong>Colorize</strong> (B&amp;W → color). An active subscription is required.
       </p>
 
-      <div className="dashboardCard dashboardImageWorkspace" style={{ marginTop: '1.25rem' }}>
+      {!plan && (
+        <p className="dashboardSettingsHint" style={{ marginBottom: '1rem' }}>
+          You do not have an active plan.{' '}
+          <Link to="/dashboard/settings">Subscribe in Settings</Link> to colorize images, or{' '}
+          <Link to="/#pricing">view plans</Link> on the home page.
+        </p>
+      )}
+      {plan && colorizeLimit != null && colorizeLimit > 0 && (
+        <p className="dashboardCardText" style={{ marginBottom: '1rem' }}>
+          This month: <strong>{colorizeUsed ?? 0}</strong> / <strong>{colorizeLimit}</strong> colorizations.{' '}
+          <Link to="/dashboard/settings">Change plan</Link>
+        </p>
+      )}
+
+      <div className="dashboardCard dashboardImageWorkspace dashboardWorkspaceCard">
         <div className="dashboardImageWorkspaceToolbar">
           <label htmlFor={inputId} className="dashboardBtn dashboardBtnSecondary" style={{ cursor: 'pointer' }}>
             Choose image
@@ -120,7 +138,7 @@ export default function DashboardWorkspace() {
         )}
       </div>
 
-      <div style={{ marginTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="dashboardWorkspaceFooterActions">
         <Link to="/dashboard" className="dashboardBtn dashboardBtnSecondary">
           Dashboard
         </Link>

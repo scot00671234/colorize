@@ -45,6 +45,8 @@ This means the **Docker build environment has run out of disk**. The app cannot 
 | `STRIPE_*` | See [STRIPE_WEBHOOK.md](./STRIPE_WEBHOOK.md); webhook path is **`/api/auth/stripe-webhook`**. |
 | `RESEND_*` | Real `RESEND_FROM` on a verified domain for production email. |
 
+**CORS errors (`Not allowed by CORS`):** In production the browser’s `Origin` must match `APP_BASE_URL` or an entry in `CORS_ORIGINS`. If `APP_BASE_URL` is missing, the server falls back to allowing only `http://localhost:5173`, so real users are blocked. Set `APP_BASE_URL=https://colorizer.cc` (exact scheme + host, no path, no trailing slash). If both apex and `www` work, set `CORS_ORIGINS=https://colorizer.cc,https://www.colorizer.cc`. Redeploy and check logs for `[cors] Allowed origins:`.
+
 ### Reverse proxy (nginx example)
 
 - Terminate TLS on nginx/Caddy; forward `https://yourdomain` → `http://127.0.0.1:3001`.
@@ -78,8 +80,8 @@ Set these before binding the port so bad deploys fail fast.
 
 ### Pricing (Stripe)
 
-- **Free / Pro / Elite** tiers are enforced in application code (`project` limits in `projects.ts`; extend for monthly image caps when you add billing rules).
-- Configure **Price IDs** in Stripe Dashboard and set `STRIPE_PRICE_PRO` / `STRIPE_PRICE_ELITE` in env.
+- **Starter / Pro / Studio** map to Stripe Price IDs: set `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, and `STRIPE_PRICE_STUDIO` (or legacy `STRIPE_PRICE_ELITE` if Studio ID is omitted).
+- **Project limits** and **monthly colorization caps** are enforced in `projects.ts` and `ai.ts` from `users.subscription_plan` (synced via webhooks and `/api/auth/me`).
 
 ### Frontend routing
 

@@ -65,8 +65,11 @@ export const config = {
 
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
+    priceStarter: process.env.STRIPE_PRICE_STARTER || '',
     pricePro: process.env.STRIPE_PRICE_PRO || '',
-    /** Elite tier Stripe Price ID. STRIPE_PRICE_ENTERPRISE still read for backward compatibility. */
+    /** Studio tier; if unset, STRIPE_PRICE_ELITE / ENTERPRISE is used (legacy). */
+    priceStudio: process.env.STRIPE_PRICE_STUDIO || '',
+    /** Legacy Elite price ID — used as Studio when STRIPE_PRICE_STUDIO is not set. */
     priceElite: process.env.STRIPE_PRICE_ELITE || process.env.STRIPE_PRICE_ENTERPRISE || '',
   },
 

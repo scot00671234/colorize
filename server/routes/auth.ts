@@ -8,6 +8,8 @@ import { config } from '../config'
 import { emailService, buildVerificationEmail, buildPasswordResetEmail } from '../services/email'
 import { requireAuth } from '../middleware/auth'
 import type { JwtPayload } from '../middleware/auth'
+import { planFromPriceId, effectivePaidPlan, projectLimitForPlan, colorizeLimitForPlan } from '../planConfig'
+import { countImageProcessThisMonth } from '../middleware/usage'
 
 const router = Router()
 const stripe = config.stripe.secretKey ? new Stripe(config.stripe.secretKey) : null
@@ -289,8 +291,11 @@ router.get('/google/callback', async (req: Request, res: Response): Promise<void
 
     const payload: JwtPayload = { userId: user.id, email: user.email }
     const token = jwt.sign(payload, config.jwt.secret, { expiresIn: config.jwt.expiresIn })
-    const target = `${config.app.baseUrl}${returnTo.startsWith('/') ? returnTo : `/${returnTo}`}?token=${encodeURIComponent(token)}`
-    res.redirect(302, target)
+    const path = returnTo.startsWith('/') ? returnTo : `/${returnTo}`
+    const base = config.app.baseUrl.replace(/\/$/, '')
+    const redirectUrl = new URL(path, `${base}/`)
+    redirectUrl.searchParams.set('token', token)
+    res.redirect(302, redirectUrl.toString())
   } catch (err) {
     console.error('Google callback DB error:', err)
     res.redirect(302, `${config.app.baseUrl}/login?error=server`)
@@ -494,7 +499,9 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
   }
   try {
     const userResult = await pool.query(
-      'SELECT id, email, email_verified_at, created_at, is_pro, COALESCE(is_team, false) AS is_team, stripe_customer_id FROM users WHERE id = $1',
+      `SELECT id, email, email_verified_at, created_at, is_pro, COALESCE(is_team, false) AS is_team,
+              subscription_plan, stripe_customer_id
+       FROM users WHERE id = $1`,
       [user.userId]
     )
     const row = userResult.rows[0]
@@ -504,83 +511,124 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
     }
     let isPro = row.is_pro === true
     let isTeam = row.is_team === true
+    let subscriptionPlan: string | null =
+      typeof row.subscription_plan === 'string' && row.subscription_plan.trim()
+        ? row.subscription_plan.trim().toLowerCase()
+        : null
     let stripeCustomerId = typeof row.stripe_customer_id === 'string' ? row.stripe_customer_id : null
 
     // Fallback sync: if webhook is delayed/missed in production, keep plan state accurate
     // by reconciling from Stripe at /me time.
     if (stripe) {
       try {
-        const priceElite = config.stripe.priceElite || ''
-
-        async function syncFromStripeCustomerId(customerId: string): Promise<{ isPro: boolean; isTeam: boolean } | null> {
-          const subscriptions = await stripe.subscriptions.list({
+        async function syncFromStripeCustomerId(
+          customerId: string
+        ): Promise<{ isPro: boolean; isTeam: boolean; subscriptionPlan: string | null } | null> {
+          const subscriptions = await stripe!.subscriptions.list({
             customer: customerId,
             status: 'all',
             limit: 20,
           })
           const activeSubs = subscriptions.data.filter((s) => s.status === 'active' || s.status === 'trialing')
-          const syncedIsPro = activeSubs.length > 0
-          const syncedIsTeam =
-            !!priceElite &&
-            activeSubs.some((s) => s.items?.data?.some((item) => item.price?.id === priceElite))
-          return { isPro: syncedIsPro, isTeam: syncedIsTeam }
+          if (activeSubs.length === 0) {
+            return { isPro: false, isTeam: false, subscriptionPlan: null }
+          }
+          for (const s of activeSubs) {
+            const priceId = s.items?.data?.[0]?.price?.id
+            const pid = typeof priceId === 'string' ? priceId : undefined
+            const paid = planFromPriceId(pid)
+            if (paid) {
+              return {
+                isPro: true,
+                isTeam: paid === 'studio',
+                subscriptionPlan: paid,
+              }
+            }
+          }
+          return { isPro: true, isTeam: false, subscriptionPlan: null }
         }
 
         async function syncFromEmail(email: string): Promise<void> {
-          const customers = await stripe.customers.list({ email, limit: 1 })
+          const customers = await stripe!.customers.list({ email, limit: 1 })
           const customer = customers.data[0]
           if (!customer?.id) return
           const nextTier = await syncFromStripeCustomerId(customer.id)
           if (!nextTier) return
 
-          if (customer.id !== stripeCustomerId || nextTier.isPro !== isPro || nextTier.isTeam !== isTeam) {
+          if (
+            customer.id !== stripeCustomerId ||
+            nextTier.isPro !== isPro ||
+            nextTier.isTeam !== isTeam ||
+            nextTier.subscriptionPlan !== subscriptionPlan
+          ) {
             console.log('[auth/me] syncing from Stripe customer by email', {
               userId: row.id,
               email,
-              old: { stripeCustomerId, isPro, isTeam },
-              next: { stripeCustomerId: customer.id, isPro: nextTier.isPro, isTeam: nextTier.isTeam },
+              old: { stripeCustomerId, isPro, isTeam, subscriptionPlan },
+              next: {
+                stripeCustomerId: customer.id,
+                isPro: nextTier.isPro,
+                isTeam: nextTier.isTeam,
+                subscriptionPlan: nextTier.subscriptionPlan,
+              },
             })
             await pool.query(
-              'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, updated_at = now() WHERE id = $4',
-              [customer.id, nextTier.isPro, nextTier.isTeam, row.id],
+              'UPDATE users SET stripe_customer_id = $1, is_pro = $2, is_team = $3, subscription_plan = $4, updated_at = now() WHERE id = $5',
+              [customer.id, nextTier.isPro, nextTier.isTeam, nextTier.subscriptionPlan, row.id],
             )
             stripeCustomerId = customer.id
             isPro = nextTier.isPro
             isTeam = nextTier.isTeam
+            subscriptionPlan = nextTier.subscriptionPlan
           }
         }
 
         if (stripeCustomerId) {
           const nextTier = await syncFromStripeCustomerId(stripeCustomerId)
-          if (nextTier && (nextTier.isPro !== isPro || nextTier.isTeam !== isTeam)) {
+          if (
+            nextTier &&
+            (nextTier.isPro !== isPro ||
+              nextTier.isTeam !== isTeam ||
+              nextTier.subscriptionPlan !== subscriptionPlan)
+          ) {
             console.log('[auth/me] syncing plan flags from Stripe', {
               userId: row.id,
               stripeCustomerId,
-              old: { isPro, isTeam },
-              next: { isPro: nextTier.isPro, isTeam: nextTier.isTeam },
+              old: { isPro, isTeam, subscriptionPlan },
+              next: {
+                isPro: nextTier.isPro,
+                isTeam: nextTier.isTeam,
+                subscriptionPlan: nextTier.subscriptionPlan,
+              },
             })
             await pool.query(
-              'UPDATE users SET is_pro = $1, is_team = $2, updated_at = now() WHERE id = $3',
-              [nextTier.isPro, nextTier.isTeam, row.id],
+              'UPDATE users SET is_pro = $1, is_team = $2, subscription_plan = $3, updated_at = now() WHERE id = $4',
+              [nextTier.isPro, nextTier.isTeam, nextTier.subscriptionPlan, row.id],
             )
             isPro = nextTier.isPro
             isTeam = nextTier.isTeam
+            subscriptionPlan = nextTier.subscriptionPlan
           }
         } else {
-          // If we don't have stripe_customer_id, use email-based sync.
-          // This prevents the UI from getting stuck in Free state when webhook updates are delayed.
           await syncFromEmail(row.email)
         }
       } catch (stripeSyncErr) {
         console.warn('[auth/me] stripe sync failed:', stripeSyncErr)
       }
     }
-    const projectLimit = isTeam ? 100 : (isPro ? 10 : 1)
+    const effectivePlan = effectivePaidPlan(subscriptionPlan, isPro, isTeam)
+    const projectLimit = projectLimitForPlan(effectivePlan)
+    const colorizeLimitMonthly = colorizeLimitForPlan(effectivePlan)
+    const colorizeUsedThisMonth = await countImageProcessThisMonth(user.userId)
     console.log('[auth/me] responding with plan', {
       userId: row.id,
       isPro,
       isTeam,
+      subscriptionPlan,
+      effectivePlan,
       projectLimit,
+      colorizeLimitMonthly,
+      colorizeUsedThisMonth,
       stripeCustomerIdPresent: !!stripeCustomerId,
     })
     res.json({
@@ -591,12 +639,15 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
         createdAt: row.created_at,
         isPro: !!isPro,
         isTeam: !!isTeam,
+        subscriptionPlan: effectivePlan,
         projectLimit,
+        colorizeLimitMonthly,
+        colorizeUsedThisMonth,
       },
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : ''
-    if (msg.includes('is_pro') || msg.includes('is_team') || msg.includes('usage_logs') || msg.includes('column') || msg.includes('relation')) {
+    if (msg.includes('is_pro') || msg.includes('is_team') || msg.includes('subscription_plan') || msg.includes('usage_logs') || msg.includes('column') || msg.includes('relation')) {
       try {
         const fallback = await pool.query(
           'SELECT id, email, email_verified_at, created_at FROM users WHERE id = $1',
@@ -615,7 +666,10 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
             createdAt: row.created_at,
             isPro: false,
             isTeam: false,
+            subscriptionPlan: null,
             projectLimit: 1,
+            colorizeLimitMonthly: 0,
+            colorizeUsedThisMonth: 0,
           },
         })
         return

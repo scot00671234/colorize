@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useState, useEffect, useRef } from 'react'
+import { useAuth, type SubscriptionPlan } from '../contexts/AuthContext'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api, clearToken } from '../api/client'
+import { CHECKOUT_PLANS, isCheckoutPlan, type CheckoutPlan } from '../constants/plans'
+
+const PLAN_LABEL: Record<SubscriptionPlan, string> = {
+  starter: 'Starter',
+  pro: 'Pro',
+  studio: 'Studio',
+}
 
 export default function DashboardSettings() {
   const { user, logout, refreshUser } = useAuth()
@@ -10,11 +17,11 @@ export default function DashboardSettings() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [billingLoading, setBillingLoading] = useState<'pro' | 'elite' | 'portal' | null>(null)
+  const [billingLoading, setBillingLoading] = useState<CheckoutPlan | 'portal' | null>(null)
   const [billingError, setBillingError] = useState<string | null>(null)
+  const checkoutStarted = useRef(false)
 
-  const isElite = user?.isTeam === true
-  const isPro = user?.isPro === true && !isElite
+  const currentPlan = user?.subscriptionPlan ?? null
 
   useEffect(() => {
     // After Stripe checkout/portal redirects back to /dashboard/settings,
@@ -29,7 +36,30 @@ export default function DashboardSettings() {
     }
   }, [searchParams, refreshUser])
 
-  async function handleUpgrade(plan: 'pro' | 'elite') {
+  const checkoutParam = searchParams.get('checkout')
+  useEffect(() => {
+    if (!user || !checkoutParam || !isCheckoutPlan(checkoutParam) || checkoutStarted.current) return
+    if (user.subscriptionPlan) {
+      window.history.replaceState({}, '', '/dashboard/settings')
+      return
+    }
+    checkoutStarted.current = true
+    setBillingError(null)
+    setBillingLoading(checkoutParam)
+    void (async () => {
+      try {
+        const { url } = await api.auth.createCheckoutSession(checkoutParam)
+        window.history.replaceState({}, '', '/dashboard/settings')
+        if (url) window.location.href = url
+      } catch (err) {
+        checkoutStarted.current = false
+        setBillingError(err instanceof Error ? err.message : 'Failed to start checkout')
+        setBillingLoading(null)
+      }
+    })()
+  }, [user, checkoutParam])
+
+  async function handleUpgrade(plan: CheckoutPlan) {
     setBillingError(null)
     setBillingLoading(plan)
     try {
@@ -55,7 +85,7 @@ export default function DashboardSettings() {
     }
   }
 
-  async function handleChangePlan(plan: 'pro' | 'elite') {
+  async function handleChangePlan(plan: CheckoutPlan) {
     setBillingError(null)
     setBillingLoading('portal')
     try {
@@ -92,60 +122,72 @@ export default function DashboardSettings() {
         <h2 className="dashboardSettingsHeading">Subscription</h2>
         <div className="dashboardCard">
           <p className="dashboardSettingsPlan">
-            Current plan: <strong>{isElite ? 'Elite' : isPro ? 'Pro' : 'Free'}</strong>
-            {(isElite || isPro) && user?.projectLimit != null && (
+            Current plan:{' '}
+            <strong>{currentPlan ? PLAN_LABEL[currentPlan] : 'None — subscribe to colorize'}</strong>
+            {currentPlan && user?.projectLimit != null && (
               <span className="dashboardSettingsPlanHint">
                 {' '}
                 — up to {user.projectLimit} saved projects
               </span>
             )}
           </p>
+          {currentPlan &&
+            user?.colorizeLimitMonthly != null &&
+            user.colorizeLimitMonthly > 0 && (
+              <p className="dashboardSettingsHint">
+                Colorizations this month:{' '}
+                <strong>
+                  {user.colorizeUsedThisMonth ?? 0} / {user.colorizeLimitMonthly}
+                </strong>{' '}
+                (resets each calendar month)
+              </p>
+            )}
           <p className="dashboardSettingsHint">
-            {isElite || isPro
-              ? 'Billing is managed with Stripe. Use the portal to update payment or cancel your subscription.'
-              : 'Choose a plan for more saved projects and future processing headroom. Billing is managed with Stripe.'}
+            {currentPlan
+              ? 'Billing is managed with Stripe. Use the portal to update payment, switch between Starter / Pro / Studio, or cancel.'
+              : 'Starter ($19/mo), Pro ($29/mo), and Studio ($99/mo) include monthly colorization allowances and project limits. Checkout opens in Stripe.'}
           </p>
           {billingError && <p className="dashboardSettingsError">{billingError}</p>}
           <div className="dashboardSettingsActions">
-            {(!isElite && !isPro) && (
+            {!currentPlan && (
               <>
-                <button
-                  type="button"
-                  className="dashboardBtn dashboardBtnPrimary"
-                  onClick={() => handleUpgrade('pro')}
-                  disabled={!user || billingLoading !== null}
-                >
-                  {billingLoading === 'pro' ? 'Opening…' : 'Upgrade to Pro'}
-                </button>
+                {CHECKOUT_PLANS.map((plan) => (
+                  <button
+                    key={plan}
+                    type="button"
+                    className={
+                      plan === 'pro' ? 'dashboardBtn dashboardBtnPrimary' : 'dashboardBtn dashboardBtnSecondary'
+                    }
+                    onClick={() => handleUpgrade(plan)}
+                    disabled={!user || billingLoading !== null}
+                  >
+                    {billingLoading === plan ? 'Opening…' : `Subscribe — ${PLAN_LABEL[plan]}`}
+                  </button>
+                ))}
+              </>
+            )}
+            {currentPlan && (
+              <>
+                {CHECKOUT_PLANS.filter((p) => p !== currentPlan).map((plan) => (
+                  <button
+                    key={plan}
+                    type="button"
+                    className="dashboardBtn dashboardBtnSecondary"
+                    onClick={() => handleChangePlan(plan)}
+                    disabled={!user || billingLoading !== null}
+                  >
+                    {billingLoading === 'portal' ? 'Opening…' : `Switch to ${PLAN_LABEL[plan]}`}
+                  </button>
+                ))}
                 <button
                   type="button"
                   className="dashboardBtn dashboardBtnSecondary"
-                  onClick={() => handleUpgrade('elite')}
+                  onClick={handleCancelSubscription}
                   disabled={!user || billingLoading !== null}
                 >
-                  {billingLoading === 'elite' ? 'Opening…' : 'Upgrade to Elite'}
+                  {billingLoading === 'portal' ? 'Opening…' : 'Manage subscription'}
                 </button>
               </>
-            )}
-            {isPro && (
-              <button
-                type="button"
-                className="dashboardBtn dashboardBtnPrimary"
-                onClick={() => handleChangePlan('elite')}
-                disabled={!user || billingLoading !== null}
-              >
-                {billingLoading === 'portal' ? 'Opening…' : 'Upgrade to Elite'}
-              </button>
-            )}
-            {(isElite || isPro) && (
-              <button
-                type="button"
-                className="dashboardBtn dashboardBtnSecondary"
-                onClick={handleCancelSubscription}
-                disabled={!user || billingLoading !== null}
-              >
-                {billingLoading === 'portal' ? 'Opening…' : 'Manage subscription'}
-              </button>
             )}
           </div>
         </div>

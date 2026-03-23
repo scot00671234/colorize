@@ -9,6 +9,8 @@ import {
 } from 'react'
 import { api, ApiHttpError, getToken, setToken, clearToken } from '../api/client'
 
+export type SubscriptionPlan = 'starter' | 'pro' | 'studio'
+
 export type User = {
   id: string
   email: string
@@ -16,7 +18,11 @@ export type User = {
   createdAt?: string
   isPro?: boolean
   isTeam?: boolean
+  /** Effective paid tier from Stripe (null if no active subscription). */
+  subscriptionPlan?: SubscriptionPlan | null
   projectLimit?: number
+  colorizeLimitMonthly?: number
+  colorizeUsedThisMonth?: number
 }
 
 type AuthState = {
@@ -67,7 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const tokenFromUrl = params.get('token')
     if (tokenFromUrl) {
       setToken(tokenFromUrl)
-      window.history.replaceState({}, '', window.location.pathname + (window.location.hash || ''))
+      const params = new URLSearchParams(window.location.search)
+      params.delete('token')
+      const rest = params.toString()
+      const path =
+        window.location.pathname + (rest ? `?${rest}` : '') + (window.location.hash || '')
+      window.history.replaceState({}, '', path)
     }
     refreshUser()
   }, [refreshUser])
@@ -77,7 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await api.auth.login(email, password)
       setToken(res.token)
-      setUser(res.user)
+      const { user: u } = await api.auth.me()
+      setUser(u)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign in failed')
       throw err

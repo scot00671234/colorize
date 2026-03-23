@@ -32,6 +32,16 @@ const app = express()
 // Behind nginx/Caddy on a VPS; first proxy only (rate-limit + IP).
 app.set('trust proxy', 1)
 
+if (isProduction) {
+  console.log('[cors] Allowed origins:', corsAllowedOrigins.join(', ') || '(none)')
+  const onlyLocalhost = corsAllowedOrigins.every((o) => /localhost|127\.0\.0\.1/.test(o))
+  if (onlyLocalhost && corsAllowedOrigins.length > 0) {
+    console.warn(
+      '[cors] WARNING: Production CORS is still using localhost defaults. Set APP_BASE_URL=https://your-domain (no trailing slash). If you use www, add CORS_ORIGINS=https://your-domain,https://www.your-domain',
+    )
+  }
+}
+
 app.use(securityHeaders)
 app.use(cors({
   origin(origin, callback) {

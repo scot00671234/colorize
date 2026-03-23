@@ -6,23 +6,29 @@ import { Router, Request, Response } from 'express'
 import { pool } from '../db'
 import { requireAuth } from '../middleware/auth'
 import type { JwtPayload } from '../middleware/auth'
+import { effectivePaidPlan, projectLimitForPlan } from '../planConfig'
 
 const router = Router()
 
-const PROJECT_LIMIT_FREE = 1
-const PROJECT_LIMIT_PRO = 10
-const PROJECT_LIMIT_TEAM = 100
+const PROJECT_LIMIT_FALLBACK = 1
 
 async function getProjectLimit(userId: string): Promise<number> {
-  if (!pool) return PROJECT_LIMIT_FREE
-  const r = await pool.query(
-    'SELECT is_pro, is_team FROM users WHERE id = $1',
-    [userId]
-  )
-  const row = r.rows[0]
-  if (row?.is_team === true) return PROJECT_LIMIT_TEAM
-  if (row?.is_pro === true) return PROJECT_LIMIT_PRO
-  return PROJECT_LIMIT_FREE
+  if (!pool) return PROJECT_LIMIT_FALLBACK
+  try {
+    const r = await pool.query(
+      'SELECT subscription_plan, is_pro, is_team FROM users WHERE id = $1',
+      [userId]
+    )
+    const row = r.rows[0]
+    const plan = effectivePaidPlan(
+      typeof row?.subscription_plan === 'string' ? row.subscription_plan : null,
+      row?.is_pro === true,
+      row?.is_team === true
+    )
+    return projectLimitForPlan(plan)
+  } catch {
+    return PROJECT_LIMIT_FALLBACK
+  }
 }
 
 router.use(requireAuth)

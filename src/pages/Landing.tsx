@@ -312,6 +312,27 @@ export default function Landing() {
         </div>
       </section>
 
+        <section
+          className="section landingCompareSection"
+          id="compare"
+          aria-label="Before and after colorization example"
+        >
+          <div className="landingCompareInner">
+            <h2 className="landingCompareTitle">Before and after</h2>
+            <p className="landingCompareSubtitle">
+              Drag the slider: original black-and-white on the left, colorized result on the right.
+            </p>
+            <div className="landingCompareFrameWrap">
+              <ColorizeBeforeAfter
+                beforeSrc="/landing/vietnam-patrol-before.png"
+                afterSrc="/landing/vietnam-patrol-after.png"
+                aspect="3/2"
+                imageDescription="Archival field photograph: compare black-and-white original with full color."
+              />
+            </div>
+          </div>
+        </section>
+
         <section className="section landingTrySection" id="try">
         <div className="landingTryHeader">
           <h2 className="landingTryTitle">Try it on your own photos</h2>

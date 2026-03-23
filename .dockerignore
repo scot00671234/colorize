@@ -1,0 +1,39 @@
+# Dependencies and build artifacts (don't copy into image; install in container)
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# Git and CI
+.git/
+.gitignore
+.github/
+
+# Env (secrets; use runtime env)
+.env
+.env.*
+!.env.example
+
+# Logs and caches
+*.log
+.npm
+.cache
+coverage/
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Docs and misc (not needed at runtime)
+docs/
+*.md
+!README.md
+
+# Tests (not needed for production image)
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx

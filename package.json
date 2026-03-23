@@ -1,0 +1,53 @@
+{
+  "name": "colorizer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "server": "tsx server/index.ts",
+    "dev:server": "tsx watch server/index.ts",
+    "start": "node scripts/run-migrations.js && tsx server/index.ts",
+    "start:prod": "tsx server/index.ts",
+    "migrate": "node scripts/run-migrations.js",
+    "local:up": "node scripts/start-local.js"
+  },
+  "dependencies": {
+    "@foliojs-fork/pdfkit": "^0.15.3",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "docx": "^9.6.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.1.1",
+    "pg": "^8.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "replicate": "^1.4.0",
+    "resend": "^6.9.4",
+    "stripe": "^17.4.0",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^22.9.0",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10"
+  }
+}

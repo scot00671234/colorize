@@ -1,0 +1,12 @@
+# FORCE nodejs_20 so the plan never uses nodejs_22 (which triggers ffeebf0a nixpkgs fetch that fails with
+# "writing a blob / pack entry" on the server). nodejs_20 uses the base/cached nixpkgs layer.
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm-9_x"]
+
+[phases.install]
+# Rollup (via Vite) relies on platform-specific optional deps (e.g. @rollup/rollup-linux-x64-gnu).
+# Using --no-optional can break builds in Linux containers.
+cmds = ["npm ci"]
+
+[start]
+cmd = "npm start"

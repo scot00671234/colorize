@@ -3849,7 +3849,13 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   font-family: inherit;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.dashboardBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .dashboardBtnPrimary {
@@ -4867,7 +4873,7 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
 .dashboardImageWorkspace {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .dashboardWorkspacePage {
@@ -4877,20 +4883,162 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   margin-right: auto;
 }
 
+.dashboardWorkspacePageHeader {
+  text-align: center;
+}
+
 .dashboardWorkspacePage > .dashboardPageTitle,
 .dashboardWorkspacePage > .dashboardPageSubtitle {
   text-align: center;
 }
 
-.dashboardWorkspacePage > .dashboardPageSubtitle {
+.dashboardWorkspacePage > .dashboardPageSubtitle,
+.dashboardWorkspaceLead {
   max-width: 42rem;
   margin-left: auto;
   margin-right: auto;
 }
 
+.dashboardWorkspaceLead {
+  margin-bottom: 0.75rem;
+}
+
+.dashboardWorkspaceHint {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 36rem;
+  margin: 0 auto 1rem;
+}
+
+.dashboardWorkspaceHint a {
+  color: var(--accent-text);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.dashboardWorkspaceHint a:hover {
+  text-decoration: underline;
+}
+
+.dashboardWorkspaceQuota {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 auto 1.5rem;
+  max-width: 28rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+}
+
+.dashboardWorkspaceQuota strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.dashboardWorkspaceQuota a {
+  color: var(--accent-text);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.dashboardWorkspaceQuota a:hover {
+  text-decoration: underline;
+}
+
 .dashboardWorkspaceCard {
-  margin-top: 1.25rem;
-  padding: 1.75rem;
+  margin-top: 0.25rem;
+  padding: 1.75rem 1.75rem 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px -16px rgba(15, 23, 42, 0.12),
+    0 4px 16px -8px rgba(45, 55, 72, 0.08);
+}
+
+[data-theme="dark"] .dashboardWorkspaceCard {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 16px 48px -20px rgba(0, 0, 0, 0.55),
+    0 4px 16px -8px rgba(0, 0, 0, 0.35);
+}
+
+.dashboardWorkspaceUploadBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+}
+
+.dashboardWorkspaceChooseBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, var(--glass-bg) 100%);
+  border: 1px solid rgba(90, 122, 138, 0.28);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.dashboardWorkspaceChooseBtn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="dark"] .dashboardWorkspaceChooseBtn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, var(--glass-bg) 100%);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.dashboardWorkspaceFileName {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  max-width: min(100%, 20rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardWorkspaceRunRow {
+  display: flex;
+  justify-content: center;
+}
+
+.dashboardWorkspaceColorizeBtn {
+  min-width: 10.5rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(90, 122, 138, 0.2);
+}
+
+.dashboardWorkspaceColorizeBtn:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(90, 122, 138, 0.28);
+}
+
+[data-theme="dark"] .dashboardWorkspaceColorizeBtn {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.dashboardWorkspaceError {
+  text-align: center;
+  margin-bottom: 0;
 }
 
 .dashboardImageWorkspaceToolbar {
@@ -4944,6 +5092,17 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   justify-content: center;
 }
 
+.dashboardWorkspaceCompareShell {
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  background: rgba(90, 122, 138, 0.04);
+  border: 1px solid var(--glass-border);
+}
+
+[data-theme="dark"] .dashboardWorkspaceCompareShell {
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .dashboardImageCompare {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -4951,9 +5110,34 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   margin-top: 0.75rem;
 }
 
+.dashboardWorkspaceCompare.dashboardImageCompare {
+  margin-top: 0;
+  gap: 1.25rem;
+}
+
+@media (min-width: 721px) {
+  .dashboardWorkspaceCompareShell .dashboardWorkspaceCompare {
+    gap: 0;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboardWorkspaceCompare .dashboardWorkspacePane:first-child {
+    padding-right: 1.25rem;
+    margin-right: 0;
+    border-right: 1px solid var(--glass-border);
+  }
+}
+
 @media (max-width: 720px) {
   .dashboardImageCompare {
     grid-template-columns: 1fr;
+  }
+
+  .dashboardWorkspaceCompare .dashboardWorkspacePane:first-child {
+    padding-right: 0;
+    border-right: none;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
   }
 }
 
@@ -4972,6 +5156,28 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   color: var(--text-muted);
 }
 
+.dashboardWorkspacePane.dashboardImagePane figcaption {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.dashboardWorkspacePaneFrame {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(90, 122, 138, 0.12);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .dashboardWorkspacePaneFrame {
+  background: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 .dashboardImagePreview {
   width: 100%;
   max-height: min(520px, 58vh);
@@ -4979,6 +5185,12 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   border-radius: var(--radius-md);
   background: var(--glass-bg-strong);
   border: 1px solid var(--glass-border);
+}
+
+.dashboardWorkspacePaneFrame .dashboardImagePreview {
+  border: none;
+  border-radius: 0;
+  background: transparent;
 }
 
 .dashboardImagePlaceholder {
@@ -4993,25 +5205,104 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   font-size: 1.25rem;
 }
 
+.dashboardWorkspacePlaceholder.dashboardImagePlaceholder {
+  min-height: 280px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 1rem;
+  text-align: center;
+  line-height: 1.45;
+  border-style: solid;
+  border-color: rgba(90, 122, 138, 0.15);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+[data-theme="dark"] .dashboardWorkspacePlaceholder.dashboardImagePlaceholder {
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 .dashboardImageDownloadRow {
   margin: 0;
   text-align: center;
 }
 
-.dashboardWorkspaceFooterActions {
-  margin-top: 1.25rem;
+.dashboardWorkspaceResultActions {
   display: flex;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0.25rem;
+}
+
+.dashboardWorkspaceResultActions a.dashboardBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.dashboardWorkspaceExportBtn {
+  min-width: 7.5rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(90, 122, 138, 0.18);
+}
+
+.dashboardWorkspaceExportBtn:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(90, 122, 138, 0.26);
+}
+
+.dashboardWorkspaceOpenBtn {
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.dashboardWorkspaceFooterActions {
+  margin-top: 1.75rem;
+  display: flex;
+  gap: 0.65rem;
   flex-wrap: wrap;
   justify-content: center;
 }
 
+.dashboardWorkspaceFooterActions a.dashboardBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.dashboardWorkspaceFooterBtn {
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  padding: 0.45rem 1.15rem;
+  font-weight: 500;
+  border-color: transparent;
+  background: var(--glass-bg-strong);
+}
+
+.dashboardWorkspaceFooterBtn:hover {
+  border-color: var(--glass-border);
+}
+
 @media (max-width: 720px) {
   .dashboardWorkspaceCard {
-    padding: 1.25rem;
+    padding: 1.25rem 1.15rem 1.5rem;
   }
 
   .dashboardImagePlaceholder {
     min-height: 220px;
+  }
+
+  .dashboardWorkspacePlaceholder.dashboardImagePlaceholder {
+    min-height: 200px;
+  }
+
+  .dashboardWorkspaceCompareShell {
+    padding: 0.75rem;
   }
 }

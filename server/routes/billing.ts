@@ -138,6 +138,16 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
         res.status(400).json({ error: 'No active subscription found to update.' })
         return
       }
+      const currentPriceId = typeof item.price?.id === 'string' ? item.price.id : ''
+      if (currentPriceId && currentPriceId === targetPriceId) {
+        res.status(400).json({
+          error:
+            `No plan change detected. Your current subscription item already uses ${targetPriceId}. ` +
+            `Check STRIPE_PRICE_STARTER / STRIPE_PRICE_PRO / STRIPE_PRICE_STUDIO (or STRIPE_PRICE_ELITE) ` +
+            'to ensure each plan maps to a different Stripe Price ID.',
+        })
+        return
+      }
 
       // Note: Stripe requires the target price to be allowed by your Billing Portal configuration
       // (features.subscription_update.products). If not, Stripe will error with a helpful message.

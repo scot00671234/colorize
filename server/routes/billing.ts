@@ -150,10 +150,15 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
         if (currentPaid) {
           const isTeam = currentPaid === 'studio'
           // Self-heal stale DB flags so Settings/UI match Stripe on next /me.
-          await pool.query(
-            'UPDATE users SET is_pro = true, is_team = $1, subscription_plan = $2, updated_at = now() WHERE id = $3',
-            [isTeam, currentPaid, user.userId]
-          )
+          try {
+            await pool.query(
+              'UPDATE users SET is_pro = true, is_team = $1, subscription_plan = $2, updated_at = now() WHERE id = $3',
+              [isTeam, currentPaid, user.userId]
+            )
+          } catch (syncErr) {
+            // Keep UX stable: this update is best-effort and should not leak DB details to clients.
+            console.warn('[billing] failed to self-heal subscription flags:', syncErr)
+          }
         }
         res.status(400).json({
           error:

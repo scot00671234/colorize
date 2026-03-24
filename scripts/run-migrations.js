@@ -42,6 +42,8 @@ export async function runMigrations() {
     await runFile('server/migrations/006_project_job_description.sql')
     console.log('Running server/migrations/007_subscription_plan.sql...')
     await runFile('server/migrations/007_subscription_plan.sql')
+    console.log('Running server/migrations/008_subscription_plan_constraint.sql...')
+    await runFile('server/migrations/008_subscription_plan_constraint.sql')
     console.log('Migrations done.')
   } finally {
     await client.end()

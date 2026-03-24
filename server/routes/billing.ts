@@ -15,6 +15,12 @@ import {
 const router = Router()
 const stripe = config.stripe.secretKey ? new Stripe(config.stripe.secretKey) : null
 
+function redactSensitiveTokens(input: string): string {
+  return input
+    .replace(/\b(?:price|sub|cus|cs|bpc|prod|seti|pi|si)_[A-Za-z0-9]+\b/g, '[redacted]')
+    .replace(/\b(?:sk|pk|rk)_(?:test|live)_[A-Za-z0-9]+\b/g, '[redacted]')
+}
+
 function subscriptionStateFromStripeSub(sub: Stripe.Subscription): {
   subscriptionPlan: string | null
   isPro: boolean
@@ -89,7 +95,7 @@ router.post('/create-checkout-session', requireAuth, async (req: Request, res: R
     const isNoSuchPrice = /no such price|resource_missing|Invalid request/i.test(rawMessage)
     const message = isNoSuchPrice
       ? 'That Stripe Price ID was not found. In Stripe Dashboard go to Products → copy the full Price ID (price_1ABC123...). Update STRIPE_PRICE_STARTER, STRIPE_PRICE_PRO, and STRIPE_PRICE_STUDIO (or STRIPE_PRICE_ELITE) in your server env and redeploy.'
-      : rawMessage
+      : redactSensitiveTokens(rawMessage)
     res.status(500).json({ error: `Checkout failed: ${message}` })
   }
 })
@@ -151,7 +157,7 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
         }
         res.status(400).json({
           error:
-            `No plan change detected. Your current subscription item already uses ${targetPriceId}. ` +
+            'No plan change detected. Your current subscription item already uses the selected plan price. ' +
             `Check STRIPE_PRICE_STARTER / STRIPE_PRICE_PRO / STRIPE_PRICE_STUDIO (or STRIPE_PRICE_ELITE) ` +
             'to ensure each plan maps to a different Stripe Price ID.',
         })
@@ -188,7 +194,7 @@ router.post('/create-portal-session', requireAuth, async (req: Request, res: Res
         : ''
     const error =
       stripeMsg && stripeMsg.length < 500
-        ? `${stripeMsg}${hint ? ` ${hint}` : ''}`
+        ? `${redactSensitiveTokens(stripeMsg)}${hint ? ` ${hint}` : ''}`
         : `Failed to open billing portal.${hint}`
     res.status(500).json({ error })
   }

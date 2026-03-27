@@ -5,11 +5,11 @@ export default function DashboardGuide() {
     <div className="dashboardPage dashboardGuidePage">
       <h1 className="dashboardPageTitle">How to use Colorizer</h1>
       <p className="dashboardPageSubtitle dashboardGuideLead">
-        Colorize or restore photos from the workspace. Use projects on the Dashboard to keep work organized.
+        Colorize photos from the workspace. Use projects on the Dashboard to keep work organized.
       </p>
 
       <div className="dashboardCard dashboardGuideCard">
-        <h2 className="dashboardGuideSectionTitle">Workspace: colorize &amp; restore</h2>
+        <h2 className="dashboardGuideSectionTitle">Workspace: colorize</h2>
         <ol className="dashboardGuideSteps">
           <li>
             <span className="dashboardGuideStepNum">1</span>
@@ -26,7 +26,7 @@ export default function DashboardGuide() {
           <li>
             <span className="dashboardGuideStepNum">3</span>
             <div>
-              Choose <strong>Colorize</strong> or <strong>Restore</strong> (optional scratch/damage option on restore).
+              Run <strong>Colorize</strong> and wait for the preview.
             </div>
           </li>
           <li>

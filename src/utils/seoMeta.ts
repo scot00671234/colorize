@@ -27,7 +27,11 @@ export type SeoMetaOptions = {
   /** Comma-separated; optional */
   keywords?: string
   image?: string
+  imageAlt?: string
   type?: 'website' | 'article'
+  articlePublishedTime?: string
+  articleModifiedTime?: string
+  articleAuthor?: string
   noindex?: boolean
 }
 
@@ -59,10 +63,17 @@ export function setSeoMeta(opts: SeoMetaOptions): void {
   setMeta('property', 'og:title', opts.title)
   setMeta('property', 'og:description', opts.description)
   setMeta('property', 'og:image', image)
+  if (opts.imageAlt) setMeta('property', 'og:image:alt', opts.imageAlt)
   setMeta('property', 'og:site_name', 'Colorizer')
   setMeta('property', 'og:locale', 'en_US')
+  if (opts.type === 'article') {
+    if (opts.articlePublishedTime) setMeta('property', 'article:published_time', opts.articlePublishedTime)
+    if (opts.articleModifiedTime) setMeta('property', 'article:modified_time', opts.articleModifiedTime)
+    if (opts.articleAuthor) setMeta('property', 'article:author', opts.articleAuthor)
+  }
 
   setMeta('name', 'twitter:card', 'summary_large_image')
   setMeta('name', 'twitter:title', opts.title)
   setMeta('name', 'twitter:description', opts.description)
+  setMeta('name', 'twitter:image', image)
 }

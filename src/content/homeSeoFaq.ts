@@ -1,16 +1,18 @@
+import { PRODUCT_FACTS } from './productTruth'
+
 /** Homepage FAQ: visible copy + FAQPage JSON-LD (AEO). */
 export const HOME_SEO_FAQ = [
   {
     q: 'What does Colorizer do?',
-    a: 'Colorizer uses AI to colorize black-and-white or faded photos and to restore damaged scans. You upload an image in the workspace, choose colorize or restore, preview the result, and download—built for family archives, scans, and creative workflows.',
+    a: 'Colorizer uses AI to colorize black-and-white or faded photos. You upload an image in the workspace, run Colorize, preview the result, and export when you are happy.',
   },
   {
     q: 'Where do I run colorization?',
-    a: 'After you sign in, open Dashboard → Workspace. Upload a JPEG, PNG, WebP, or GIF, pick Colorize or Restore, and run processing. Preview the output on the same screen and download when you are happy with it.',
+    a: 'After you sign in, open Dashboard → Workspace. Upload a JPEG, PNG, WebP, or GIF, then run Colorize. Preview the output on the same screen and export when you are ready.',
   },
   {
     q: 'How does pricing work?',
-    a: 'Colorizer is subscription-based: Starter (~400 colorizations/mo), Pro (~1,500/mo), and Studio (~8,000/mo), each with higher saved-project limits. You create an account first, then checkout runs in Stripe. Monthly colorization counts reset each calendar month.',
+    a: `Colorizer is subscription-based: Starter (~${PRODUCT_FACTS.paidPlans.starter.colorizationsMonthly} colorizations/mo), Pro (~${PRODUCT_FACTS.paidPlans.pro.colorizationsMonthly.toLocaleString()}), and Studio (~${PRODUCT_FACTS.paidPlans.studio.colorizationsMonthly.toLocaleString()}). Each plan has a saved-project limit, and monthly colorization counts reset each calendar month.`,
   },
   {
     q: 'Will my photos stay private?',
@@ -18,7 +20,7 @@ export const HOME_SEO_FAQ = [
   },
   {
     q: 'What kinds of photos work best?',
-    a: 'Scans of prints, phone photos of old pictures, and digital files with faded color or damage are typical candidates. Final quality depends on the source image and whether you colorize or restore.',
+    a: 'Scans of prints, phone photos of old pictures, and digital files with faded color are typical candidates. Final quality depends on source sharpness, lighting, and compression.',
   },
   {
     q: 'Do you store my originals?',
@@ -31,4 +33,4 @@ export const HOME_SEO_FAQ = [
 ] as const
 
 export const HOME_SEO_KEYWORDS =
-  'ai photo colorizer, colorize black and white photo, restore old photo, ai image restoration, photo enhancement, vintage photo, family photos, scan restoration, image colorization, colorizer'
+  'ai photo colorizer, colorize black and white photo, colorize old photos, photo enhancement, vintage photo, family photos, scan colorization, image colorization, colorizer'

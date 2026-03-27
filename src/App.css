@@ -2224,6 +2224,25 @@ button.pricingCta:disabled {
   color: var(--text-secondary);
 }
 
+.landingFaqLinks {
+  max-width: 40rem;
+  margin: 0.9rem auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.landingFaqLinks a {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.landingFaqLinks a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .ctaSection {
   padding: 4rem 1.5rem;
 }
@@ -2406,6 +2425,22 @@ button.pricingCta:disabled {
   margin: 0 0 1rem;
 }
 
+.blogCardIntent {
+  margin: 0 0 0.45rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.blogCardQuestion {
+  margin: 0 0 0.9rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
 .blogCardFooter {
   display: flex;
   flex-wrap: wrap;
@@ -2485,6 +2520,26 @@ button.pricingCta:disabled {
   gap: 0.4rem;
 }
 
+.blogQuickAnswerLabel {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.blogQuickAnswer {
+  margin: 0 0 1rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
 .blogKeyword {
   font-size: 0.6875rem;
   padding: 0.2rem 0.5rem;
@@ -2539,6 +2594,58 @@ button.pricingCta:disabled {
   margin-top: 2.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--glass-border);
+}
+
+.blogFaqSection,
+.blogRelatedSection {
+  margin-top: 1.5rem;
+}
+
+.blogFaqList {
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.blogFaqItem {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+}
+
+.blogFaqQ {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.blogFaqA {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.blogRelatedList {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.blogRelatedList li {
+  margin-bottom: 0.4rem;
+}
+
+.blogRelatedList a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.blogRelatedList a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .blogCta {
@@ -4869,7 +4976,7 @@ body[data-page="dashboard"] .resumeAtsPanel::before {
   margin-bottom: 0.35rem;
 }
 
-/* Image workspace (Replicate colorize / restore) */
+/* Image workspace (Replicate colorize) */
 .dashboardImageWorkspace {
   display: flex;
   flex-direction: column;

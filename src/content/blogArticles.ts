@@ -254,6 +254,156 @@ export const blogArticles: BlogArticle[] = [
       { type: 'ul', items: ['Reduce glare and shadows.', 'Crop distractions around the subject.', 'Use the highest-resolution original available.'] },
     ],
   },
+  {
+    slug: 'phone-camera-vs-flatbed-scan-for-colorization',
+    title: 'Phone Camera vs Flatbed Scan for Photo Colorization',
+    metaDescription:
+      'Which source capture method is better before AI colorization, and when a phone photo can perform almost as well as a scanner.',
+    date: '2026-03-25',
+    lastReviewed: '2026-03-25',
+    readTime: '6 min',
+    searchIntent: 'commercial',
+    primaryQuestion: 'Should I use a phone camera or a flatbed scanner before colorizing?',
+    quickAnswer:
+      'Use a flatbed scan when possible for consistency, especially for prints with fine detail. A phone photo can still work well if it is straight-on, evenly lit, and high resolution.',
+    keyTakeaways: [
+      'Flatbed scans usually provide more consistent detail and geometry.',
+      'Phone captures are acceptable when lighting is controlled and glare-free.',
+      'The best method is whichever gives the cleanest file with minimal compression.',
+    ],
+    whoFor: 'Anyone digitizing old prints and deciding how to capture files before colorization.',
+    steps: [
+      'If available, scan at 300-600 DPI.',
+      'If using a phone, shoot perpendicular to the print in soft light.',
+      'Compare both captures once in the workspace and keep the better source.',
+    ],
+    limitations: [
+      'Glossy prints can reflect light even with careful phone setup.',
+      'Some low-cost scanners introduce blur at edges; compare outputs.',
+    ],
+    faq: [
+      { q: 'Do I need a scanner to use Colorizer?', a: 'No. You can upload phone photos of prints as long as they are clear and well lit.' },
+      { q: 'Will higher DPI always win?', a: 'Not always. Clarity, focus, and low compression matter as much as DPI.' },
+    ],
+    relatedSlugs: ['best-scan-settings-for-old-photos', 'what-to-do-when-colorized-photo-looks-wrong'],
+    ctaVariant: 'workspace',
+    keywords: ['phone vs scanner old photos', 'flatbed scan colorization', 'best source for ai colorization'],
+    blocks: [
+      { type: 'p', text: 'Capture quality controls downstream colorization quality. Flatbeds are steady and repeatable, while phones are convenient and often good enough with proper setup.' },
+      { type: 'h2', text: 'When flatbed scanning wins' },
+      { type: 'ul', items: ['Large batches with consistent quality requirements.', 'Fine texture or small face detail.', 'Archival workflows where repeatability matters.'] },
+      { type: 'h2', text: 'When phone capture is enough' },
+      { type: 'ul', items: ['You only have a few prints to process.', 'You can shoot straight-on in diffuse daylight.', 'You can avoid glare and perspective skew.'] },
+    ],
+  },
+  {
+    slug: 'organize-family-photo-archive-with-projects',
+    title: 'How to Organize a Family Photo Archive with Projects',
+    metaDescription:
+      'A practical naming and workflow system for keeping colorized outputs organized in your dashboard projects.',
+    date: '2026-03-26',
+    lastReviewed: '2026-03-26',
+    readTime: '5 min',
+    searchIntent: 'informational',
+    primaryQuestion: 'How should I organize old family photos while colorizing them?',
+    quickAnswer:
+      'Use clear project names by family branch, decade, or event, then save each successful run to the dashboard. Keep original files separately and export final images with consistent naming.',
+    keyTakeaways: [
+      'Good naming reduces duplicate work and makes retrieval faster.',
+      'Project limits differ by plan, so prioritize meaningful grouping.',
+      'Store originals outside the app and use exports for long-term retention.',
+    ],
+    whoFor: 'Family historians and creators managing many photos over time.',
+    steps: [
+      'Choose a naming format (for example: Family-Year-Location).',
+      'Save each finished image to the most relevant project.',
+      'Export with a standard suffix like -colorized and back up externally.',
+    ],
+    faq: [
+      { q: 'Can I rename projects later?', a: 'Yes. You can edit project names after saving.' },
+      { q: 'Do projects count toward plan limits?', a: 'Yes. Starter, Pro, and Studio each have different saved-project limits.' },
+    ],
+    relatedSlugs: ['colorizer-workspace-quick-start', 'how-colorizer-pricing-and-limits-work'],
+    ctaVariant: 'register',
+    keywords: ['organize family photo archive', 'photo project naming', 'dashboard photo workflow'],
+    blocks: [
+      { type: 'p', text: 'Most archive friction comes from inconsistent naming. Decide a simple project structure first, then run colorization in batches that map to those projects.' },
+      { type: 'h2', text: 'Recommended naming format' },
+      { type: 'ul', items: ['Surname or branch (Patel, Miller, etc.)', 'Timeframe (1950s, 1978, etc.)', 'Event or location (Wedding, ChicagoTrip)'] },
+      { type: 'blockquote', text: 'Keep originals unchanged in external storage. Use dashboard projects for organization and exports for deliverables.' },
+    ],
+  },
+  {
+    slug: 'starter-vs-pro-vs-studio-real-usage-examples',
+    title: 'Starter vs Pro vs Studio: Real Usage Examples',
+    metaDescription:
+      'Examples of which Colorizer plan fits occasional family use, regular archive work, and high-volume monthly workflows.',
+    date: '2026-03-27',
+    lastReviewed: '2026-03-27',
+    readTime: '5 min',
+    searchIntent: 'commercial',
+    primaryQuestion: 'Which Colorizer plan fits my monthly workload?',
+    quickAnswer:
+      'Pick based on monthly image volume and project count: Starter for light usage, Pro for steady archive sessions, and Studio for high-volume workflows that need larger monthly allowance and more saved projects.',
+    keyTakeaways: [
+      'Plan fit is mostly about monthly throughput.',
+      'Project limit matters if you segment work into many named sets.',
+      'You can switch plans from Settings with Stripe billing.',
+    ],
+    whoFor: 'Prospective buyers comparing plans before checkout.',
+    faq: [
+      { q: 'Can I upgrade later?', a: 'Yes. Plan changes are managed in Settings via Stripe.' },
+      { q: 'What happens if I hit my monthly limit?', a: 'You can wait for reset next calendar month or change to a higher plan.' },
+    ],
+    relatedSlugs: ['how-colorizer-pricing-and-limits-work', 'colorizer-workspace-quick-start'],
+    ctaVariant: 'pricing',
+    keywords: ['starter vs pro vs studio', 'colorizer plan comparison', 'photo colorization plan'],
+    blocks: [
+      { type: 'p', text: 'You do not need to guess. Estimate your average monthly image count and how many projects you keep active, then match that against plan limits.' },
+      { type: 'h2', text: 'Usage scenarios' },
+      { type: 'ul', items: ['Starter: occasional weekend family archive sessions.', 'Pro: weekly archive work and regular exports.', 'Studio: continuous production-style workflows.'] },
+      { type: 'h2', text: 'Decision shortcut' },
+      { type: 'p', text: 'If you regularly exceed a plan limit for two months in a row, move up a tier to reduce workflow interruptions.' },
+    ],
+  },
+  {
+    slug: 'ai-colorization-limitations-what-to-expect',
+    title: 'AI Colorization Limitations: What to Expect',
+    metaDescription:
+      'Understand what AI colorization can and cannot recover so you can set realistic expectations before processing old photos.',
+    date: '2026-03-28',
+    lastReviewed: '2026-03-28',
+    readTime: '6 min',
+    searchIntent: 'informational',
+    primaryQuestion: 'What can AI colorization realistically recover from old photos?',
+    quickAnswer:
+      'AI colorization can infer plausible color from visible structure, but it cannot perfectly reconstruct missing detail or guarantee historical color certainty in every region of an image.',
+    keyTakeaways: [
+      'Plausible color is not the same as historically verified color.',
+      'Missing or blurred detail cannot be fully recreated by colorization alone.',
+      'Best results come from clean, high-quality source captures.',
+    ],
+    whoFor: 'Users who want accurate expectations before running or sharing colorized images.',
+    limitations: [
+      'Unclear objects can receive uncertain color estimates.',
+      'Severely degraded prints may still look flat after colorization.',
+      'Artifacts in the source often carry into output.',
+    ],
+    faq: [
+      { q: 'Is AI output historically exact?', a: 'Not always. It is a plausible estimate based on visual context.' },
+      { q: 'Should I keep the original file?', a: 'Yes. Keep originals and treat colorized output as a derivative for viewing and sharing.' },
+    ],
+    relatedSlugs: ['colorize-black-and-white-photos', 'what-to-do-when-colorized-photo-looks-wrong'],
+    ctaVariant: 'workspace',
+    keywords: ['ai colorization limitations', 'photo colorization accuracy', 'historical photo colorization'],
+    blocks: [
+      { type: 'p', text: 'Understanding limits helps avoid disappointment. AI colorization is strongest when source content is clear, but uncertainty increases when objects are obscured, damaged, or low-resolution.' },
+      { type: 'h2', text: 'What AI does well' },
+      { type: 'ul', items: ['Global tone reconstruction on portraits and outdoor scenes.', 'Plausible color for common materials (skin, sky, vegetation, clothing).', 'Fast iteration for archive and storytelling workflows.'] },
+      { type: 'h2', text: 'Where human review is still required' },
+      { type: 'ul', items: ['Historically sensitive uniforms and insignia.', 'Critical publishing contexts that require source citation.', 'Any image with significant missing detail.'] },
+    ],
+  },
 ]
 
 export function getBlogArticlesSorted(): BlogArticle[] {

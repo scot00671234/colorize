@@ -255,6 +255,13 @@ body[data-page="landing"] .navCta:hover {
   z-index: 1;
 }
 
+/* Landing hero: more width for the before/after demo */
+.landingPage .heroInner {
+  width: min(1200px, 100%);
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: 2rem;
+}
+
 /* Hero backdrop: gradient by default. Photo: public/hero-desk.png when data-hero-bg="true" (override with --hero-bg-image). */
 .heroBackdrop {
   position: absolute;
@@ -628,6 +635,24 @@ body[data-page="landing"] .navCta:hover {
   color: var(--accent-text);
 }
 
+.heroTitleCursor {
+  display: inline-block;
+  width: 0.06em;
+  min-width: 2px;
+  height: 0.92em;
+  margin-left: 0.06em;
+  vertical-align: -0.06em;
+  background: var(--accent-text);
+  border-radius: 1px;
+  animation: heroTitleCursorBlink 0.85s step-end infinite;
+}
+
+@keyframes heroTitleCursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .heroSubtitle {
   font-size: 1.0625rem;
   font-weight: 400;
@@ -751,7 +776,7 @@ body[data-page="landing"] .navCta:hover {
   align-items: stretch;
   gap: 1rem;
   width: 100%;
-  max-width: 28rem;
+  max-width: min(40rem, 100%);
   justify-self: end;
 }
 
@@ -924,7 +949,7 @@ body[data-page="landing"] .navCta:hover {
 @media (max-width: 960px) {
   .landingPage .heroPreview {
     justify-self: center;
-    max-width: 36rem;
+    max-width: min(42rem, 100%);
   }
 }
 

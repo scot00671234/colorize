@@ -8,6 +8,67 @@ import { getSiteUrl } from '../utils/siteUrl'
 import { setSeoMeta } from '../utils/seoMeta'
 import type { CheckoutPlan } from '../constants/plans'
 
+const HERO_HEADLINE_PREFIX = 'Bring old photos back with '
+const HERO_HEADLINE_ACCENT = 'color'
+const HERO_HEADLINE_SUFFIX = ' and clarity.'
+const HERO_HEADLINE_FULL =
+  HERO_HEADLINE_PREFIX + HERO_HEADLINE_ACCENT + HERO_HEADLINE_SUFFIX
+
+function HeroTypewriterTitle() {
+  const totalLen = HERO_HEADLINE_FULL.length
+  const prefixLen = HERO_HEADLINE_PREFIX.length
+  const accentEnd = prefixLen + HERO_HEADLINE_ACCENT.length
+
+  const [visible, setVisible] = useState(0)
+  const [complete, setComplete] = useState(false)
+
+  useEffect(() => {
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) {
+      setVisible(totalLen)
+      setComplete(true)
+      return
+    }
+
+    let i = 0
+    const tick = window.setInterval(() => {
+      i += 1
+      if (i >= totalLen) {
+        setVisible(totalLen)
+        setComplete(true)
+        window.clearInterval(tick)
+      } else {
+        setVisible(i)
+      }
+    }, 36)
+
+    return () => window.clearInterval(tick)
+  }, [totalLen])
+
+  const part1 = HERO_HEADLINE_FULL.slice(0, Math.min(visible, prefixLen))
+  const partAccent =
+    visible > prefixLen
+      ? HERO_HEADLINE_FULL.slice(prefixLen, Math.min(visible, accentEnd))
+      : ''
+  const part2 =
+    visible > accentEnd ? HERO_HEADLINE_FULL.slice(accentEnd, visible) : ''
+
+  return (
+    <h1 className="heroTitle" aria-label={HERO_HEADLINE_FULL}>
+      {part1}
+      {partAccent ? (
+        <span className="heroTitleAccent">{partAccent}</span>
+      ) : null}
+      {part2}
+      {!complete ? (
+        <span className="heroTitleCursor" aria-hidden />
+      ) : null}
+    </h1>
+  )
+}
+
 const PATH_STEPS = [
   { id: 1, title: 'Memories deserve color', body: 'Faded prints and monochrome scans can feel distant. Thoughtful color brings people and places back into focus.' },
   { id: 2, title: 'Damage is not the end', body: 'Scratches, noise, and wear show up in every archive. Restoration can stabilize faces, edges, and detail before you share.' },
@@ -241,9 +302,7 @@ export default function Landing() {
           <div className="heroInner">
             <div className="heroContent heroContentSplit">
               <span className="heroBadge">Simple plans · Stripe billing</span>
-              <h1 className="heroTitle">
-                Bring old photos back with <span className="heroTitleAccent">color</span> and clarity.
-              </h1>
+              <HeroTypewriterTitle />
               <p className="heroSubtitle">
                 Colorizer helps you colorize black-and-white pictures and faded scans in a simple web workflow built for family albums, archives, and creative projects.
               </p>

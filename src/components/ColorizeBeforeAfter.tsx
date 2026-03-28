@@ -7,7 +7,7 @@ type SingleImageProps = {
   afterSrc?: never
   imageDescription: string
   /** Optional frame aspect (default 16/10). */
-  aspect?: '16/10' | '3/2'
+  aspect?: '16/10' | '3/2' | '4/3'
 }
 
 /** True pair: separate black-and-white and color files (aligned composition). */
@@ -16,14 +16,15 @@ type PairProps = {
   afterSrc: string
   imageSrc?: never
   imageDescription: string
-  aspect?: '16/10' | '3/2'
+  aspect?: '16/10' | '3/2' | '4/3'
 }
 
 type Props = SingleImageProps | PairProps
 
-function frameClass(aspect: '16/10' | '3/2' | undefined): string {
+function frameClass(aspect: '16/10' | '3/2' | '4/3' | undefined): string {
   const base = 'colorizeBeforeAfterFrame'
   if (aspect === '3/2') return `${base} colorizeBeforeAfterFrame--3x2`
+  if (aspect === '4/3') return `${base} colorizeBeforeAfterFrame--4x3`
   return base
 }
 

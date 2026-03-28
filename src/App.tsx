@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import { Routes, Route, Link, useLocation, Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import ThemeToggle from './components/ThemeToggle'
@@ -30,30 +31,74 @@ function LegacyResumeToWorkspace() {
 
 function Nav() {
   const { user, logout } = useAuth()
+  const location = useLocation()
+  const [concealed, setConcealed] = useState(false)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    setConcealed(false)
+    lastScrollY.current = typeof window !== 'undefined' ? window.scrollY : 0
+  }, [location.pathname])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (mq.matches) return undefined
+
+    let frame = 0
+    const onScroll = () => {
+      cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        const y = window.scrollY
+        const prev = lastScrollY.current
+        const delta = y - prev
+        if (y < 72) {
+          setConcealed(false)
+        } else if (delta > 8) {
+          setConcealed(true)
+        } else if (delta < -8) {
+          setConcealed(false)
+        }
+        lastScrollY.current = y
+      })
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
 
   return (
-    <nav className="nav">
-      <div className="navInner">
-        <Link to="/" className="navBrand">
-          <img src="/logo.svg" alt="" className="navLogo" width="28" height="28" />
-          <span>Colorizer</span>
-        </Link>
-        <div className="navLinks">
-          <a href="/#about">About</a>
-          <a href="/#features">Features</a>
-          <a href="/#pricing">Pricing</a>
-          <ThemeToggle />
-          {user ? (
-            <>
-              <Link to="/dashboard">Dashboard</Link>
-              <button type="button" onClick={logout}>Sign out</button>
-            </>
-          ) : (
-            <>
-              <Link to="/register" className="navCta">Get started</Link>
-              <Link to="/login">Sign in</Link>
-            </>
-          )}
+    <nav
+      className={`nav${concealed ? ' nav--concealed' : ''}`}
+      aria-label="Main navigation"
+      aria-hidden={concealed}
+    >
+      <div className="navPill">
+        <div className="navInner">
+          <Link to="/" className="navBrand">
+            <img src="/logo.svg" alt="" className="navLogo" width="28" height="28" />
+            <span>Colorizer</span>
+          </Link>
+          <div className="navLinks">
+            <a href="/#about">About</a>
+            <a href="/#features">Features</a>
+            <a href="/#pricing">Pricing</a>
+            <ThemeToggle />
+            {user ? (
+              <>
+                <Link to="/dashboard">Dashboard</Link>
+                <button type="button" onClick={logout}>Sign out</button>
+              </>
+            ) : (
+              <>
+                <Link to="/register" className="navCta">Get started</Link>
+                <Link to="/login">Sign in</Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>

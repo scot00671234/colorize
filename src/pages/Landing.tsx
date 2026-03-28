@@ -187,7 +187,7 @@ const PLANS: readonly {
 ] as const
 
 function usePathStepVisible() {
-  const refs = useRef<(HTMLDivElement | null)[]>([])
+  const refs = useRef<(HTMLLIElement | null)[]>([])
   const [visible, setVisible] = useState<Set<number>>(new Set())
 
   useEffect(() => {
@@ -304,7 +304,7 @@ export default function Landing() {
               <span className="heroBadge">Simple plans · Stripe billing</span>
               <HeroTypewriterTitle />
               <p className="heroSubtitle">
-                Colorizer helps you colorize black-and-white pictures and faded scans in a simple web workflow built for family albums, archives, and creative projects.
+                Colorize black-and-white and faded photos in your browser. Upload, preview, export.
               </p>
               <ul className="heroValueChips" aria-label="What Colorizer does">
                 <li>AI colorization</li>
@@ -332,42 +332,44 @@ export default function Landing() {
         </main>
 
         <section className="section pathSection" id="path" aria-label="Why photo colorization matters">
-        <h2 className="pathSectionTitle">Every picture has a story</h2>
-        <div className="pathImagesRow" aria-label="Colorized archival photography examples">
-          <div className="landingPhotoCard pathImageTile">
-            <img
-              src="/landing/examples/example-buffalo-niagara-street.png"
-              alt="Colorized historical photograph of Niagara Street, Buffalo, with streetcars and ornate architecture"
-              loading="lazy"
-              decoding="async"
+        <header className="pathSectionHeader">
+          <h2 className="pathSectionTitle">Every picture has a story</h2>
+          <p className="pathSectionLead">
+            From faded prints to finished files—clear steps, no clutter.
+          </p>
+        </header>
+        <div className="pathImagesRow" aria-label="Before and after colorization examples">
+          <div className="pathGalleryItem">
+            <ColorizeBeforeAfter
+              imageSrc="/landing/examples/example-buffalo-niagara-street.png"
+              aspect="4/3"
+              imageDescription="Historic Niagara Street, Buffalo: drag to compare grayscale with color."
             />
           </div>
-          <div className="landingPhotoCard pathImageTile">
-            <img
-              src="/landing/examples/example-london-1945.png"
-              alt="Colorized photograph of a child with a stuffed toy amid ruined buildings"
-              loading="lazy"
-              decoding="async"
+          <div className="pathGalleryItem pathGalleryItem--portrait">
+            <ColorizeBeforeAfter
+              imageSrc="/landing/examples/example-london-1945.png"
+              aspect="4/3"
+              imageDescription="1940s portrait: drag to compare grayscale with color."
             />
           </div>
         </div>
         <div className="pathSectionInner">
-          <div className="pathSteps">
-            <div className="pathLine" aria-hidden />
+          <ol className="pathStoryList">
             {PATH_STEPS.map((step, i) => (
-              <div
+              <li
                 key={step.id}
-                className={`pathStep pathStep${i % 2 === 0 ? 'Left' : 'Right'} ${visible.has(i) ? 'pathStepVisible' : ''}`}
+                className={`pathStoryItem${visible.has(i) ? ' pathStoryItemVisible' : ''}`}
                 ref={(el) => { refs.current[i] = el }}
               >
-                <div className="pathNode" aria-hidden />
-                <div className="pathCard">
-                  <h3 className="pathCardTitle">{step.title}</h3>
-                  <p className="pathCardBody">{step.body}</p>
+                <span className="pathStoryIndex" aria-hidden>{String(i + 1).padStart(2, '0')}</span>
+                <div className="pathStoryBody">
+                  <h3 className="pathStoryTitle">{step.title}</h3>
+                  <p className="pathStoryText">{step.body}</p>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
@@ -442,16 +444,6 @@ export default function Landing() {
           <p className="aboutLead">
             You bring the files. We help them look right on modern screens—without a desktop lab.
           </p>
-        </div>
-        <div className="aboutImageCenter">
-          <div className="landingPhotoCard aboutImageCard">
-            <img
-              src="/landing/examples/example-migrant-mother.png"
-              alt="Colorized documentary-style photograph of a mother with children"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
         </div>
         <div className="aboutContent aboutContentSimple">
           <ul className="aboutPoints" aria-label="What Colorizer does for you">

@@ -477,9 +477,9 @@ export default function Landing() {
         <section className="section" id="pricing">
         <div className="sectionHeader">
           <p className="sectionLabel">Pricing</p>
-          <h2 className="sectionTitle">Starter, Pro, and Studio — pick the volume you need.</h2>
-          <p className="landingPricingIntro" style={{ textAlign: 'center', maxWidth: '36rem', margin: '-0.5rem auto 1.5rem', color: 'var(--muted, #5c6b73)', fontSize: '0.95rem' }}>
-            Colorizing uses your plan&apos;s monthly allowance. Create an account first, then checkout opens in Stripe for the plan you choose.
+          <h2 className="sectionTitle">Starter, Pro, and Studio for the volume you need.</h2>
+          <p className="landingPricingIntro">
+            Higher tiers include more colorizations per month. Create an account, then pay in Stripe.
           </p>
         </div>
         <div className="pricingGrid">

@@ -241,6 +241,16 @@
     0 22px 52px -22px rgb(var(--accent-rgb) / 28%);
 }
 
+/* Beat .navLinks a { color: … } so pill CTA keeps high-contrast label text */
+.navLinks a.navCta,
+.navLinks a.navCta:hover {
+  color: var(--btn-primary-text);
+}
+
+.navLinks a.navCta::after {
+  display: none;
+}
+
 .themeToggle {
   display: inline-flex;
   align-items: center;

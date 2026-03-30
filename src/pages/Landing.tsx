@@ -499,6 +499,9 @@ export default function Landing() {
             </article>
           ))}
         </div>
+        <p className="landingPricingGuarantee">
+          Refund within 7 days if you are not happy.
+        </p>
       </section>
 
         <section className="section landingFaqSection" id="faq" aria-labelledby="landing-faq-heading">

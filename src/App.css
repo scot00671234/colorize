@@ -2286,6 +2286,19 @@ button.pricingCta:disabled {
   color: rgba(255, 255, 255, 0.58);
 }
 
+.landingPricingGuarantee {
+  text-align: center;
+  max-width: 36rem;
+  margin: 1.75rem auto 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .landingPage .landingPricingGuarantee {
+  color: rgba(255, 255, 255, 0.66);
+}
+
 /* Homepage FAQ (SEO / AEO) */
 .landingFaqSection .sectionHeader {
   max-width: 36rem;
